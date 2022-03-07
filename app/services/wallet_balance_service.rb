@@ -1,0 +1,72 @@
+require 'binance'
+
+class WalletBalanceService
+  KEY = Rails.application.credentials[:binance_key]
+  SECRET = Rails.application.credentials[:binance_secret]
+
+  attr_accessor :client
+
+  def initialize(key = KEY, secret = SECRET)
+    self.client = Binance::Spot.new(key: key, secret: secret)
+  end
+
+  def mixed_wallet
+    @mixed_wallet ||= mix_wallets
+      .sort_by { |e| e[:asset] }
+  end
+
+  def persist_postitions
+    mixed_wallet.each do |e|
+      pos = Position.find_or_initialize_by(asset: e[:asset], wallet: 'spot')
+      pos.amount = e[:free]
+      pos.save!
+    end
+  end
+
+  def savings_wallet
+    @savings_wallet ||= client.savings_account[:positionAmountVos]
+      .select { |e| e[:amount].to_f.positive? }
+      .sort_by { |e| e[:asset] }
+      .each { |e| e[:amount] = e[:amount].to_f }
+  end
+
+  def spot_wallet
+    @spot_wallet ||= client.account[:balances]
+      .select { |e| normal_spot_balance(e) }
+      .sort_by { |e| e[:asset] }
+      .each { |e| e[:free] = e[:free].to_f }
+  end
+
+  def usd_balances
+    tickers = client.ticker_price
+    Position.select('asset, SUM(amount) AS amount').group(:asset).map do |pos|
+      price_hash = tickers.find { |e| e[:symbol] == "#{pos[:asset]}USDT" }
+      price = price_hash ? price_hash[:price].to_f : 1.0
+      pos.attributes.merge(price: price, value: (pos.amount * price).round(2))
+    end
+  end
+
+  private
+
+  def empty_position(asset, amount)
+    { asset: asset, free: amount, locked: 0.0 }
+  end
+
+  def mix_wallets
+    savings_wallet.reduce(spot_wallet.clone) do |spot, e_postion|
+      amount = e_postion[:amount].to_f
+      s_position = spot.find { |e| e[:asset] == e_postion[:asset] }
+
+      if s_position.nil?
+        spot << empty_position(e_postion[:asset], amount)
+      else
+        s_position[:free] += amount
+        spot
+      end
+    end
+  end
+
+  def normal_spot_balance(position)
+    position[:free].to_f.positive? && !position[:asset].include?('LD')
+  end
+end
