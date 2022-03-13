@@ -67,6 +67,6 @@ class WalletBalanceService
   end
 
   def normal_spot_balance(position)
-    position[:free].to_f.positive? && !position[:asset].include?('LD')
+    position[:free].to_f.positive? && position[:asset].exclude?('LD')
   end
 end

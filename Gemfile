@@ -22,6 +22,8 @@ gem 'pg', '~> 1.1'
 
 # Binance
 gem 'binance-connector-ruby'
+# User registrations
+gem 'devise'
 
 # Build JSON APIs with ease [https://github.com/rails/jbuilder]
 gem 'jbuilder'
