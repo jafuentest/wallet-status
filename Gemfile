@@ -1,5 +1,5 @@
 source 'https://rubygems.org'
-git_source(:github) { |repo| 'https://github.com/#{repo}.git' }
+git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
 ruby '2.7.5'
 
@@ -45,7 +45,12 @@ gem 'stimulus-rails'
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
-  gem 'debug', platforms: %i[ mri mingw x64_mingw ]
+  gem 'debug', platforms: %i[mri mingw x64_mingw]
+
+  # Code style check
+  gem 'rubocop'
+  gem 'rubocop-performance'
+  gem 'rubocop-rails'
 end
 
 group :development do
