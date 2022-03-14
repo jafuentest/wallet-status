@@ -1,0 +1,25 @@
+<h1>Positions</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Symbol</th>
+      <th>Amount</th>
+      <th>Price</th>
+      <th>Holdings</th>
+      <th>Portfolio %</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% portfolio_size = @positions.sum { |e| e['amount'] * e[:price] } %>
+    <% @positions.each do |pos| %>
+      <tr>
+        <td><%= pos['symbol'] %></td>
+        <td><%= pos['amount'] %></td>
+        <td><%= pos[:price] %></td>
+        <td><%= pos[:value] %></td>
+        <td><%= (pos[:value] / portfolio_size * 100).round(2) %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

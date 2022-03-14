@@ -12,12 +12,11 @@ class WalletBalanceService
 
   def mixed_wallet
     @mixed_wallet ||= mix_wallets
-      .sort_by { |e| e[:asset] }
   end
 
-  def persist_postitions
+  def persist_postitions(user)
     mixed_wallet.each do |e|
-      pos = Position.find_or_initialize_by(asset: e[:asset], wallet: 'spot')
+      pos = user.positions.find_or_initialize_by(symbol: e[:asset], wallet: 'spot')
       pos.amount = e[:free]
       pos.save!
     end
@@ -26,21 +25,19 @@ class WalletBalanceService
   def savings_wallet
     @savings_wallet ||= client.savings_account[:positionAmountVos]
       .select { |e| e[:amount].to_f.positive? }
-      .sort_by { |e| e[:asset] }
       .each { |e| e[:amount] = e[:amount].to_f }
   end
 
   def spot_wallet
     @spot_wallet ||= client.account[:balances]
       .select { |e| normal_spot_balance(e) }
-      .sort_by { |e| e[:asset] }
       .each { |e| e[:free] = e[:free].to_f }
   end
 
-  def usd_balances
+  def usd_balances(user)
     tickers = client.ticker_price
-    Position.select('asset, SUM(amount) AS amount').group(:asset).map do |pos|
-      price_hash = tickers.find { |e| e[:symbol] == "#{pos[:asset]}USDT" }
+    user.positions.select('symbol, SUM(amount) AS amount').group(:symbol).map do |pos|
+      price_hash = tickers.find { |e| e[:symbol] == "#{pos[:symbol]}USDT" }
       price = price_hash ? price_hash[:price].to_f : 1.0
       pos.attributes.merge(price: price, value: (pos.amount * price).round(2))
     end
