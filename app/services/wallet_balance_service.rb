@@ -35,7 +35,6 @@ class WalletBalanceService
   end
 
   def usd_balances(user)
-    tickers = client.ticker_price
     user.positions.select('symbol, SUM(amount) AS amount').group(:symbol).map do |pos|
       price_hash = tickers.find { |e| e[:symbol] == "#{pos[:symbol]}USDT" }
       price = price_hash ? price_hash[:price].to_f : 1.0
@@ -44,6 +43,10 @@ class WalletBalanceService
   end
 
   private
+
+  def tickers
+    @tickers = client.ticker_price
+  end
 
   def empty_position(asset, amount)
     { asset: asset, free: amount, locked: 0.0 }

@@ -3,7 +3,9 @@ Rails.application.routes.draw do
 
   devise_for :users
 
-  resources :positions
+  resources :positions do
+    post :update_wallet, on: :collection
+  end
 
   # Defines the root path route ("/")
   root 'positions#index'
