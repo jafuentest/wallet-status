@@ -1,10 +1,11 @@
 class CreatePositions < ActiveRecord::Migration[7.0]
   def change
     create_table :positions do |t|
-      t.references :user, null: false, foreign_key: true
+      t.references :wallet, null: false, foreign_key: true
+      t.string :sub_wallet
+      t.decimal :cost_basis
       t.decimal :amount
       t.string :symbol
-      t.string :wallet
 
       t.timestamps
     end

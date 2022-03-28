@@ -15,13 +15,14 @@ ActiveRecord::Schema[7.0].define(version: 2022_03_13_070512) do
   enable_extension "plpgsql"
 
   create_table "positions", force: :cascade do |t|
-    t.bigint "user_id", null: false
+    t.bigint "wallet_id", null: false
+    t.string "sub_wallet"
+    t.decimal "cost_basis"
     t.decimal "amount"
     t.string "symbol"
-    t.string "wallet"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["user_id"], name: "index_positions_on_user_id"
+    t.index ["wallet_id"], name: "index_positions_on_wallet_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -36,5 +37,19 @@ ActiveRecord::Schema[7.0].define(version: 2022_03_13_070512) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
-  add_foreign_key "positions", "users"
+  create_table "wallets", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "service", null: false
+    t.string "wallet_type"
+    t.string "address"
+    t.string "api_key"
+    t.string "api_secret"
+    t.datetime "last_sync"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_wallets_on_user_id"
+  end
+
+  add_foreign_key "positions", "wallets"
+  add_foreign_key "wallets", "users"
 end

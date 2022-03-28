@@ -1,22 +1,21 @@
 require 'binance'
 
 class WalletBalanceService
-  KEY = Rails.application.credentials[:binance_key]
-  SECRET = Rails.application.credentials[:binance_secret]
-
   attr_accessor :client
 
-  def initialize(key = KEY, secret = SECRET)
-    self.client = Binance::Spot.new(key: key, secret: secret)
+  def initialize(user)
+    @user = user
+    @wallet = user.wallets.where(service: 'binance').first
+    self.client = Binance::Spot.new(key: @wallet.api_key, secret: @wallet.api_secret)
   end
 
   def mixed_wallet
     @mixed_wallet ||= mix_wallets
   end
 
-  def persist_postitions(user)
+  def persist_postitions
     mixed_wallet.each do |e|
-      pos = user.positions.find_or_initialize_by(symbol: e[:asset], wallet: 'spot')
+      pos = @wallet.positions.find_or_initialize_by(symbol: e[:asset], sub_wallet: 'spot')
       pos.amount = e[:free]
       pos.save!
     end
@@ -34,8 +33,8 @@ class WalletBalanceService
       .each { |e| e[:free] = e[:free].to_f }
   end
 
-  def usd_balances(user)
-    user.positions.select('symbol, SUM(amount) AS amount').group(:symbol).map do |pos|
+  def usd_balances
+    @user.positions.select('symbol, SUM(amount) AS amount').group(:symbol).map do |pos|
       price_hash = tickers.find { |e| e[:symbol] == "#{pos[:symbol]}USDT" }
       price = price_hash ? price_hash[:price].to_f : 1.0
       pos.attributes.merge(price: price, value: (pos.amount * price).round(2)).symbolize_keys
