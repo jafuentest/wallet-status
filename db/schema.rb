@@ -10,8 +10,9 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2022_03_13_070512) do
+ActiveRecord::Schema[7.0].define(version: 2022_03_28_052750) do
   # These are extensions that must be enabled in order to support this database
+  enable_extension "hstore"
   enable_extension "plpgsql"
 
   create_table "positions", force: :cascade do |t|
@@ -23,6 +24,22 @@ ActiveRecord::Schema[7.0].define(version: 2022_03_13_070512) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["wallet_id"], name: "index_positions_on_wallet_id"
+  end
+
+  create_table "trades", force: :cascade do |t|
+    t.bigint "wallet_id", null: false
+    t.string "from_asset"
+    t.decimal "from_amount"
+    t.decimal "from_cost_basis"
+    t.string "to_asset"
+    t.decimal "to_amount"
+    t.decimal "to_cost_basis"
+    t.datetime "timestamp"
+    t.string "order_id"
+    t.string "order_type"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["wallet_id"], name: "index_trades_on_wallet_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -42,6 +59,7 @@ ActiveRecord::Schema[7.0].define(version: 2022_03_13_070512) do
     t.string "service", null: false
     t.string "wallet_type"
     t.string "address"
+    t.hstore "api_details"
     t.string "api_key"
     t.string "api_secret"
     t.datetime "last_sync"
@@ -51,5 +69,6 @@ ActiveRecord::Schema[7.0].define(version: 2022_03_13_070512) do
   end
 
   add_foreign_key "positions", "wallets"
+  add_foreign_key "trades", "wallets"
   add_foreign_key "wallets", "users"
 end
