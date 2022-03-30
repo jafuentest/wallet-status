@@ -14,6 +14,12 @@ AllCops:
 
   TargetRubyVersion: 2.7.5
 
+Layout/CaseIndentation:
+  EnforcedStyle: end
+
+Layout/EndAlignment:
+  EnforcedStyleAlignWith: variable
+
 Layout/LineLength:
   Exclude:
     - db/seeds.rb
