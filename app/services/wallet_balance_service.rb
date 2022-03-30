@@ -1,6 +1,8 @@
 require 'binance'
 
 class WalletBalanceService
+  include WalletBalanceService::Convert
+
   attr_accessor :client
 
   def initialize(user)
@@ -41,47 +43,7 @@ class WalletBalanceService
     end
   end
 
-  def fetch_converts
-    loop do
-      Rails.logger.debug "Fetching convert trades between #{start_convert} and #{end_convert}"
-
-      break if (Time.now.utc - start_convert) < 1.minute
-
-      converts = client.convert_trade_flow(startTime: start_convert.strftime('%Q'), endTime: end_convert.strftime('%Q'))
-
-      converts[:list].each do |convertion|
-        create_trade_from_convertion(convertion) if convertion[:orderStatus] == 'SUCCESS'
-      end
-
-      @wallet.update(api_details: @wallet.api_details.merge('convertions_last_fetch' => end_convert))
-    end
-  end
-
   private
-
-  def create_trade_from_convertion(convertion)
-    @wallet.trades.convertions.create!(
-      from_asset: convertion[:fromAsset],
-      from_amount: convertion[:fromAmount],
-      to_asset: convertion[:toAsset],
-      to_amount: convertion[:toAmount],
-      timestamp: Time.zone.at(convertion[:createTime] / 1000),
-      order_id: convertion[:orderId]
-    )
-  rescue StandardError # TODO: Should be unique index error, whatever that is
-    Rails.logger.warn "Fetched existing trade, order_id: #{convertion[:orderId]}, wallet_id: #{@wallet.id}}"
-  end
-
-  def start_convert
-    convertions_last_fetch = @wallet.api_details['convertions_last_fetch']
-    return Time.utc(2022, 1, 1).to_datetime if convertions_last_fetch.blank?
-
-    DateTime.parse(convertions_last_fetch)
-  end
-
-  def end_convert
-    [start_convert + 30.days, Time.now.utc.to_datetime].min
-  end
 
   def tickers
     @tickers = client.ticker_price
