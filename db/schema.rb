@@ -39,6 +39,7 @@ ActiveRecord::Schema[7.0].define(version: 2022_03_28_052750) do
     t.string "order_type"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["order_id", "order_type"], name: "index_trades_on_order_id_and_order_type", unique: true
     t.index ["wallet_id"], name: "index_trades_on_wallet_id"
   end
 

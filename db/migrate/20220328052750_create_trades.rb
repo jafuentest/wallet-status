@@ -13,6 +13,8 @@ class CreateTrades < ActiveRecord::Migration[7.0]
       t.string :order_type
 
       t.timestamps
+
+      t.index [:order_id, :order_type], unique: true
     end
   end
 end
