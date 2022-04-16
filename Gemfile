@@ -22,7 +22,7 @@ gem 'pg', '~> 1.1'
 # gem 'bcrypt', '~> 3.1.7'
 
 # Binance
-gem 'binance-connector-ruby'
+gem 'binance-connector-ruby', '1.0.2', path: '../binance-connector-ruby'
 # User registrations
 gem 'devise'
 
