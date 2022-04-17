@@ -2,6 +2,7 @@ require 'binance'
 
 class WalletBalanceService
   include WalletBalanceService::Convert
+  include WalletBalanceService::Margin
 
   attr_accessor :client
 

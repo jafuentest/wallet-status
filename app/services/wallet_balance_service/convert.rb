@@ -5,10 +5,7 @@ module WalletBalanceService::Convert
       break if (Time.current - start_convert) < 1.minute
 
       converts = client.convert_trade_flow(startTime: start_convert.strftime('%Q'), endTime: end_convert.strftime('%Q'))
-      converts[:list].each do |convertion|
-        create_trade_from_convertion(convertion)
-      end
-
+      converts[:list].each { |convertion| create_trade_from_convertion(convertion) }
       update_wallet
     end
   end
@@ -43,7 +40,7 @@ module WalletBalanceService::Convert
       timestamp: Time.strptime(convertion[:createTime].to_s, '%Q'),
       order_id: convertion[:orderId]
     )
-  rescue StandardError # TODO: Should be unique index error, whatever that is
+  rescue ActiveRecord::RecordNotUnique
     Rails.logger.warn "Fetched existing trade, order_id: #{convertion[:orderId]}, wallet_id: #{@wallet.id}}"
   end
 end
