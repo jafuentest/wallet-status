@@ -60,7 +60,7 @@ ActiveRecord::Schema[7.0].define(version: 2022_03_28_052750) do
     t.string "service", null: false
     t.string "wallet_type"
     t.string "address"
-    t.hstore "api_details"
+    t.hstore "api_details", default: {}
     t.string "api_key"
     t.string "api_secret"
     t.datetime "last_sync"

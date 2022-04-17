@@ -7,7 +7,7 @@ class CreateWallets < ActiveRecord::Migration[7.0]
       t.string :service, null: false
       t.string :wallet_type
       t.string :address
-      t.hstore :api_details
+      t.hstore :api_details, default: {}
       t.string :api_key
       t.string :api_secret
       t.datetime :last_sync
