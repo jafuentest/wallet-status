@@ -40,4 +40,5 @@
 
 # Automatically generated JS
 /app/javascript/controllers/index.js
+/app/assets/builds
 /node_modules
