@@ -9,7 +9,7 @@ module WalletBalanceService::Margin
         endTime: end_margin_transfer.strftime('%Q')
       )
 
-      transfers[:rows].each { |transfer| create_trade_from_margin_transfer(transfer) }
+      transfers[:rows].each { |transfer| create_transaction_from_margin_transfer(transfer) }
       update_wallet_margin_transfer
     end
   end
@@ -35,12 +35,12 @@ module WalletBalanceService::Margin
     [start_margin_transfer + 30.days, Time.current.to_datetime].min
   end
 
-  def create_trade_from_margin_transfer(transfer)
+  def create_transaction_from_margin_transfer(transfer)
     return unless transfer[:status] == 'CONFIRMED'
 
     transfer_type = transfer[:type] == 'ROLL_IN' ? :from : :to
 
-    @wallet.trades.margin_transfers.create!(
+    @wallet.transactions.margin_transfers.create!(
       "#{transfer_type}_asset" => transfer[:asset],
       "#{transfer_type}_amount" => transfer[:amount],
       timestamp: Time.strptime(transfer[:timestamp].to_s, '%Q'),
