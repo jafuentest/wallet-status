@@ -16,6 +16,8 @@ class CreateTransactions < ActiveRecord::Migration[7.0]
       t.datetime :timestamp, null: false
 
       t.timestamps
+
+      t.index [:order_id, :order_type], unique: true
     end
   end
 end
