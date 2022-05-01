@@ -40,6 +40,7 @@ Metrics/BlockLength:
     - setup     # Because of devise
 
 Metrics/AbcSize:
+  CountRepeatedAttributes: false
   Exclude:
     - db/migrate/*
 
