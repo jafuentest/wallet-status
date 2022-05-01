@@ -26,7 +26,7 @@ ActiveRecord::Schema[7.0].define(version: 2022_03_28_052750) do
     t.index ["wallet_id"], name: "index_positions_on_wallet_id"
   end
 
-  create_table "transaction", force: :cascade do |t|
+  create_table "transactions", force: :cascade do |t|
     t.bigint "wallet_id", null: false
     t.string "from_asset"
     t.decimal "from_amount"
@@ -42,7 +42,7 @@ ActiveRecord::Schema[7.0].define(version: 2022_03_28_052750) do
     t.datetime "timestamp", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["wallet_id"], name: "index_transaction_on_wallet_id"
+    t.index ["wallet_id"], name: "index_transactions_on_wallet_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -72,6 +72,6 @@ ActiveRecord::Schema[7.0].define(version: 2022_03_28_052750) do
   end
 
   add_foreign_key "positions", "wallets"
-  add_foreign_key "transaction", "wallets"
+  add_foreign_key "transactions", "wallets"
   add_foreign_key "wallets", "users"
 end
