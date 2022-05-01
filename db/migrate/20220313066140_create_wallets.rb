@@ -5,9 +5,9 @@ class CreateWallets < ActiveRecord::Migration[7.0]
     create_table :wallets do |t|
       t.references :user, null: false, foreign_key: true
       t.string :service, null: false
-      t.string :wallet_type
+      t.string :wallet_type, null: false
       t.string :address
-      t.hstore :api_details, default: {}
+      t.hstore :api_details, null: false, default: {}
       t.string :api_key
       t.string :api_secret
       t.datetime :last_sync

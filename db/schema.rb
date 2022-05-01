@@ -19,14 +19,14 @@ ActiveRecord::Schema[7.0].define(version: 2022_03_28_052750) do
     t.bigint "wallet_id", null: false
     t.string "sub_wallet"
     t.decimal "cost_basis"
-    t.decimal "amount"
-    t.string "symbol"
+    t.decimal "amount", null: false
+    t.string "symbol", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["wallet_id"], name: "index_positions_on_wallet_id"
   end
 
-  create_table "trades", force: :cascade do |t|
+  create_table "transaction", force: :cascade do |t|
     t.bigint "wallet_id", null: false
     t.string "from_asset"
     t.decimal "from_amount"
@@ -34,13 +34,15 @@ ActiveRecord::Schema[7.0].define(version: 2022_03_28_052750) do
     t.string "to_asset"
     t.decimal "to_amount"
     t.decimal "to_cost_basis"
-    t.datetime "timestamp"
+    t.string "fee_asset"
+    t.decimal "fee_amount"
+    t.decimal "fee_cost_basis"
     t.string "order_id"
-    t.string "order_type"
+    t.string "order_type", null: false
+    t.datetime "timestamp", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["order_id", "order_type"], name: "index_trades_on_order_id_and_order_type", unique: true
-    t.index ["wallet_id"], name: "index_trades_on_wallet_id"
+    t.index ["wallet_id"], name: "index_transaction_on_wallet_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -58,9 +60,9 @@ ActiveRecord::Schema[7.0].define(version: 2022_03_28_052750) do
   create_table "wallets", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.string "service", null: false
-    t.string "wallet_type"
+    t.string "wallet_type", null: false
     t.string "address"
-    t.hstore "api_details", default: {}
+    t.hstore "api_details", default: {}, null: false
     t.string "api_key"
     t.string "api_secret"
     t.datetime "last_sync"
@@ -70,6 +72,6 @@ ActiveRecord::Schema[7.0].define(version: 2022_03_28_052750) do
   end
 
   add_foreign_key "positions", "wallets"
-  add_foreign_key "trades", "wallets"
+  add_foreign_key "transaction", "wallets"
   add_foreign_key "wallets", "users"
 end
