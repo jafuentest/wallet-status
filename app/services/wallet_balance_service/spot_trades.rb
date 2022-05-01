@@ -36,8 +36,6 @@ module WalletBalanceService::SpotTrades
     Rails.logger.error "Error fetching trades for #{symbol}: #{e}"
   end
 
-  def update_wallet(pair, order_id); end
-
   def log_spot_trade(pair)
     Rails.logger.debug { "Fetching #{pair} spot trades after spot order #{last_spot_trade(pair)}" }
   end
