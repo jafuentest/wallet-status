@@ -33,6 +33,7 @@
 
 # Ignore master key for decrypting credentials and more.
 /config/master.key
+/config/credentials.yml.enc
 
 # Sublime-Text files
 /*.sublime-project
@@ -40,4 +41,5 @@
 
 # Automatically generated JS
 /app/javascript/controllers/index.js
+/app/assets/builds
 /node_modules
