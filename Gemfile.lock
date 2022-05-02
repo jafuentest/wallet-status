@@ -117,6 +117,7 @@ GEM
     faraday-patron (1.0.0)
     faraday-rack (1.0.0)
     faraday-retry (1.0.3)
+    foreman (0.87.2)
     globalid (1.0.0)
       activesupport (>= 5.0)
     i18n (1.10.0)
@@ -267,6 +268,7 @@ DEPENDENCIES
   cssbundling-rails
   debug
   devise
+  foreman
   jbuilder
   jsbundling-rails
   pg (~> 1.1)
