@@ -21,7 +21,7 @@ set :deploy_to, '/home/ec2-user/wallet_status'
 # set :pty, true
 
 # Default value for :linked_files is []
-set :linked_files, %w[config/master.key config/credentials.yml]
+set :linked_files, %w[config/master.key config/credentials.yml.enc]
 
 # Default value for linked_dirs is []
 append :linked_dirs, 'log', 'tmp/pids', 'tmp/cache', 'tmp/sockets', 'public/system', 'vendor', 'storage'
