@@ -1,7 +1,9 @@
-PATH
-  remote: ../binance-connector-ruby
+GIT
+  remote: https://github.com/jafuentest/binance-connector-ruby.git
+  revision: ed7839728cfc5290324b55a5302207407d11b0be
+  branch: get-convert-history
   specs:
-    binance-connector-ruby (1.0.2)
+    binance-connector-ruby (1.0.3)
       faraday (~> 1.8)
       websocket-eventmachine-client (~> 1.3)
 
@@ -263,7 +265,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  binance-connector-ruby (= 1.0.2)!
+  binance-connector-ruby!
   bootsnap
   cssbundling-rails
   debug
