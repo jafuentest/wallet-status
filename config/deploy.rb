@@ -40,7 +40,7 @@ append :linked_dirs, 'log', 'tmp/pids', 'tmp/cache', 'tmp/sockets', 'public/syst
 
 set :rails_env, 'production'
 
-set :bundle_without, %i[development test]
+set :bundle_without, %w[development test]
 
 set :puma_bind,       "unix://#{shared_path}/tmp/sockets/#{fetch(:application)}-puma.sock"
 set :puma_state,      "#{shared_path}/tmp/pids/puma.state"
