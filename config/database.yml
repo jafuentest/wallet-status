@@ -83,4 +83,6 @@ production:
   <<: *default
   database: wallet_status_production
   username: wallet_status
-  password: <%= ENV["WALLET_STATUS_DATABASE_PASSWORD"] %>
+  password: <%= Rails.application.credentials.pg[:password] %>
+  host:     <%= Rails.application.credentials.pg[:host] %>
+  port:     <%= Rails.application.credentials.pg[:port] %>

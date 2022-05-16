@@ -12,7 +12,7 @@ gem 'puma', '~> 5.6'
 gem 'bootsnap', require: false
 
 # Use postgresql as the database for Active Record
-gem 'pg', '~> 1.1'
+gem 'pg', '~> 1.2.3'
 
 # Use Redis adapter to run Action Cable in production
 # gem 'redis', '~> 4.0'
@@ -22,7 +22,7 @@ gem 'pg', '~> 1.1'
 # gem 'bcrypt', '~> 3.1.7'
 
 # Binance
-gem 'binance-connector-ruby', '1.0.2', path: '../binance-connector-ruby'
+gem 'binance-connector-ruby', github: 'jafuentest/binance-connector-ruby', branch: 'get-convert-history'
 # User registrations
 gem 'devise'
 
@@ -69,6 +69,12 @@ group :development do
 
   # Speed up commands on slow machines / big apps [https://github.com/rails/spring]
   # gem 'spring'
+
+  gem 'capistrano'
+  gem 'capistrano3-puma'
+  gem 'capistrano-bundler'
+  gem 'capistrano-rails'
+  gem 'capistrano-rvm'
 end
 
 group :test do
