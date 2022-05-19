@@ -5,7 +5,8 @@ set :application, 'wallet_status'
 set :repo_url, 'git@github.com:jafuentest/wallet-status.git'
 
 # Default branch is :master
-ask :branch, `git rev-parse --abbrev-ref HEAD`.chomp
+branch_name = `git rev-parse --abbrev-ref HEAD`.chomp
+branch_name == 'master' ? set(:branch, branch_name) : ask(:branch, branch_name)
 
 # Default deploy_to directory is /var/www/wallet_status
 set :deploy_to, '/home/ec2-user/wallet_status'

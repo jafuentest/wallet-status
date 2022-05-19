@@ -17,7 +17,7 @@ class CreateTransactions < ActiveRecord::Migration[7.0]
 
       t.timestamps
 
-      t.index [:order_id, :order_type], unique: true
+      t.index %i[order_id order_type], unique: true
     end
   end
 end
