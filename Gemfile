@@ -27,6 +27,7 @@ gem 'binance-connector-ruby', github: 'jafuentest/binance-connector-ruby', branc
 gem 'devise'
 # Background jobs
 gem 'delayed_job_active_record'
+gem 'delayed_job_recurring'
 
 # Build JSON APIs with ease [https://github.com/rails/jbuilder]
 gem 'jbuilder'
