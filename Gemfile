@@ -25,6 +25,8 @@ gem 'pg', '~> 1.2.3'
 gem 'binance-connector-ruby', github: 'jafuentest/binance-connector-ruby', branch: 'get-convert-history'
 # User registrations
 gem 'devise'
+# Background jobs
+gem 'delayed_job_active_record'
 
 # Build JSON APIs with ease [https://github.com/rails/jbuilder]
 gem 'jbuilder'
