@@ -41,17 +41,20 @@ module WalletBalanceService::SpotTrades
   end
 
   def create_transaction_from_spot_trade(spot_trade, pair)
-    transaction = from(spot_trade, pair).merge(to(spot_trade, pair))
-      .merge(
-        timestamp: Time.strptime(spot_trade[:time].to_s, '%Q'),
-        order_id: spot_trade[:orderId],
-        fee_asset: spot_trade[:commissionAsset],
-        fee_amount: spot_trade[:commission]
-      )
+    transaction_attributes = assets(spot_trade, pair).merge(
+      timestamp: Time.strptime(spot_trade[:time].to_s, '%Q'),
+      order_id: spot_trade[:orderId],
+      fee_asset: spot_trade[:commissionAsset],
+      fee_amount: spot_trade[:commission]
+    )
 
-    @wallet.transactions.spot_trades.create!(transaction)
+    @wallet.transactions.spot_trades.create!(transaction_attributes)
   rescue ActiveRecord::RecordNotUnique
     Rails.logger.warn "Fetched existing margin trade, order_id: #{spot_trade[:orderId]}, wallet_id: #{@wallet.id}}"
+  end
+
+  def assets(transaction_hash, pair)
+    from(transaction_hash, pair).merge to(transaction_hash, pair)
   end
 
   def from(transaction_hash, pair)
