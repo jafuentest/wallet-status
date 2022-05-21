@@ -1,13 +1,13 @@
 module WalletBalanceService::SpotTrades
   def fetch_trades_on(parent_symbol)
-    slices = available_pairs(parent_symbol, slice_size: 50)
+    slices = available_pairs(parent_symbol, slice_size: 25)
     slices.with_index do |pairs_batch, i|
       start = Time.zone.now
       threads = pairs_batch.map { |e| Thread.new { fetch_pair_trades(e[0], e[1]) } }
       threads.each(&:join)
 
       # Sleep for a minute to prevent API ban
-      sleep(30 - (Time.zone.now - start)) unless i == slices.size - 1
+      sleep(15 - (Time.zone.now - start)) unless i == slices.size - 1
     end
   end
 
