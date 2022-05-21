@@ -27,7 +27,7 @@ module WalletBalanceService::SpotTrades
     my_trades = client.my_trades(symbol: symbol, orderId: last_spot_trade(symbol))
     my_trades.each { |my_trade| create_transaction_from_spot_trade(my_trade, pair) }
 
-    last_order_id = my_trades.last&.dig(:orderId)
+    last_order_id = my_trades.last&.dig(:orderId) || return
     @wallet.update(api_details: @wallet.api_details.merge("#{symbol}_last_spot_order_id" => last_order_id))
   rescue ActiveRecord::ConnectionTimeoutError
     sleep(1)
