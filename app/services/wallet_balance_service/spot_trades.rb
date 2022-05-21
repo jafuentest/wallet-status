@@ -21,7 +21,6 @@ module WalletBalanceService::SpotTrades
   end
 
   def fetch_pair_trades(symbol, pair)
-    retries ||= 0
     log_spot_trade(pair)
 
     my_trades = client.my_trades(symbol: symbol, orderId: last_spot_trade(symbol))
@@ -29,10 +28,7 @@ module WalletBalanceService::SpotTrades
 
     last_order_id = my_trades.last&.dig(:orderId) || return
     @wallet.update(api_details: @wallet.api_details.merge("#{symbol}_last_spot_order_id" => last_order_id))
-  rescue ActiveRecord::ConnectionTimeoutError
-    sleep(1)
-    retry if retries < 4
-  rescue SocketError, Faraday::ConnectionFailed => e
+  rescue SocketError, Faraday::ConnectionFailed, ActiveRecord::ConnectionTimeoutError => e
     Rails.logger.error "Error fetching trades for #{symbol}: #{e}"
   end
 
