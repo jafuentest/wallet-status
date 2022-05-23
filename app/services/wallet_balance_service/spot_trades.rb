@@ -1,4 +1,21 @@
 module WalletBalanceService::SpotTrades
+  def fetch_pair_trades(symbol, pair)
+    log_spot_trade(pair)
+
+    my_trades = client.my_trades(symbol: symbol, orderId: last_spot_trade(symbol))
+    my_trades.each { |my_trade| create_transaction_from_spot_trade(my_trade, pair) }
+
+    last_order_id = my_trades.last&.dig(:orderId) || return
+    @wallet.update(api_details: @wallet.api_details.merge("#{symbol}_last_spot_order_id" => last_order_id))
+  rescue SocketError, Faraday::ConnectionFailed, ActiveRecord::ConnectionTimeoutError => e
+    Rails.logger.error "Error fetching trades for #{symbol}: #{e}"
+  end
+
+  def fetch_spot_trades
+    parent_symbols = %w[bnb btc busd eth others usdc usdt]
+    parent_symbols.each { |symbol| fetch_trades_on(symbol) }
+  end
+
   def fetch_trades_on(parent_symbol)
     slices = available_pairs(parent_symbol, slice_size: 25)
     slices.with_index do |pairs_batch, i|
@@ -18,18 +35,6 @@ module WalletBalanceService::SpotTrades
     return slices if slice_size.nil?
 
     slices.each_slice(slice_size)
-  end
-
-  def fetch_pair_trades(symbol, pair)
-    log_spot_trade(pair)
-
-    my_trades = client.my_trades(symbol: symbol, orderId: last_spot_trade(symbol))
-    my_trades.each { |my_trade| create_transaction_from_spot_trade(my_trade, pair) }
-
-    last_order_id = my_trades.last&.dig(:orderId) || return
-    @wallet.update(api_details: @wallet.api_details.merge("#{symbol}_last_spot_order_id" => last_order_id))
-  rescue SocketError, Faraday::ConnectionFailed, ActiveRecord::ConnectionTimeoutError => e
-    Rails.logger.error "Error fetching trades for #{symbol}: #{e}"
   end
 
   def log_spot_trade(pair)
