@@ -48,7 +48,9 @@ class WalletBalanceService
   private
 
   def tickers
-    @tickers = client.ticker_price
+    Rails.cache.fetch('tickers', expires_in: 10.minutes) do
+      @tickers = client.ticker_price
+    end
   end
 
   def empty_position(asset, amount)
