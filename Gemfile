@@ -11,6 +11,9 @@ gem 'puma', '~> 5.6'
 # Reduces boot times through caching; required in config/boot.rb
 gem 'bootsnap', require: false
 
+# New Relic
+gem 'newrelic_rpm'
+
 # Use postgresql as the database for Active Record
 gem 'pg', '~> 1.2.3'
 
