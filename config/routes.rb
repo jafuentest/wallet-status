@@ -7,6 +7,8 @@ Rails.application.routes.draw do
     post :update_wallet, on: :collection
   end
 
+  resources :transactions, only: [:index]
+
   # Defines the root path route ("/")
   root 'positions#index'
 end
