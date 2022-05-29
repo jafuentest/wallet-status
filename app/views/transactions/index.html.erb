@@ -1,0 +1,14 @@
+<h1>Trades</h1>
+
+<table class="table table-striped">
+  <tbody>
+    <% @transactions.each do |trade| %>
+      <tr>
+        <td><%= trade.timestamp %></td>
+        <td><%= trade.order_type %></td>
+        <td><%= "#{trade.from_amount} #{trade.from_asset}" %></td>
+        <td><%= "#{trade.to_amount} #{trade.to_asset}" %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
