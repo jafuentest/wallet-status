@@ -86,7 +86,7 @@ production:
   database: wallet_status_production
   username: wallet_status
 
-  <% if ENV.fetch('PROVIDER', '').casecmp('heroku').zero? %>
+  <% unless ENV.fetch('PROVIDER', '').casecmp('heroku').zero? %>
   password: <%= Rails.application.credentials.pg[:password] %>
   host:     <%= Rails.application.credentials.pg[:host] %>
   port:     <%= Rails.application.credentials.pg[:port] %>
