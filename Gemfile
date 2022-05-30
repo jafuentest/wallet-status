@@ -79,6 +79,7 @@ group :development do
   gem 'capistrano'
   gem 'capistrano3-puma'
   gem 'capistrano-bundler'
+  gem 'capistrano-delayed-job'
   gem 'capistrano-rails'
   gem 'capistrano-rvm'
 end
