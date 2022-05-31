@@ -1,0 +1,19 @@
+[Unit]
+Description=Puma Worker for wallet_status (production)
+After=network.target
+
+[Service]
+Type=simple
+User=ec2-user
+Environment="RAILS_ENV=production"
+WorkingDirectory=/home/ec2-user/wallet_status/current
+ExecStart=/home/ec2-user/.rvm/bin/rvm default do bundle exec rails jobs:work
+ExecReload=/bin/kill -TSTP $MAINPID
+StandardOutput=append:/home/ec2-user/wallet_status/shared/log/delayed_job.log
+StandardError=append:/home/ec2-user/wallet_status/shared/log/delayed_job.error.log
+Restart=always
+RestartSec=1
+SyslogIdentifier=delayed_job
+
+[Install]
+WantedBy=multi-user.target
