@@ -32,6 +32,7 @@ module WalletBalanceService::SpotTrades
 
   def available_pairs(parent_symbol, slice_size: nil)
     slices = YAML.load_file(Rails.root.join('config', 'trading_pairs', "#{parent_symbol}.yml"))
+    slices = slices.each_pair.reduce({}) { |h, (k, v)| h.merge(v) } if parent_symbol == 'others'
     return slices if slice_size.nil?
 
     slices.each_slice(slice_size)
