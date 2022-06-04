@@ -12,13 +12,13 @@ class RecurringTasks::FetchTransations
       binance = WalletBalanceService.new(user)
 
       Rails.logger.info "Fetching spot trades for user id: #{user.id}"
-      binance.fetch_spot_trades
+      binance.delay.fetch_spot_trades
 
       Rails.logger.info "Fetching convertion trades for user id: #{user.id}"
-      binance.fetch_converts
+      binance.delay.fetch_converts
 
       Rails.logger.info "Fetching margin transfers for user id: #{user.id}"
-      binance.fetch_margin_transfers
+      binance.delay.fetch_margin_transfers
     end
   end
 end
