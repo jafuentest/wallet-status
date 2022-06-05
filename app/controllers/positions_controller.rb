@@ -11,4 +11,16 @@ class PositionsController < ApplicationController
     b.persist_postitions
     redirect_to positions_path
   end
+
+  def staking
+  end
+
+  def create_staking
+  end
+
+  def update_staking
+  end
+
+  def destroy_staking
+  end
 end

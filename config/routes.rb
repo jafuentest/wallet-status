@@ -5,8 +5,15 @@ Rails.application.routes.draw do
 
   devise_for :users
 
-  resources :positions, only: [:index] do
-    post :update_wallet, on: :collection
+  resources :positions do
+    collection do
+      post :update_wallet
+
+      get :staking
+      post :staking, action: 'create_staking'
+      patch 'stake/:id', action: 'update_staking', as: :staked
+      delete 'stake/:id', action: 'destroy_staking'
+    end
   end
 
   resources :transactions, only: [:index]
