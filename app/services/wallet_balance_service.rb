@@ -49,7 +49,7 @@ class WalletBalanceService
 
   def tickers
     Rails.cache.fetch('tickers', expires_in: 10.minutes) do
-      @tickers = client.ticker_price(recvWindow: 60_000)
+      @tickers = client.ticker_price
     end
   end
 
