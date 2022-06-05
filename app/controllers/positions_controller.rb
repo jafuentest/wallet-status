@@ -13,6 +13,7 @@ class PositionsController < ApplicationController
   end
 
   def staking
+    @positions = current_user.positions.staking.sort_by { |e| e[:symbol] }
   end
 
   def create_staking

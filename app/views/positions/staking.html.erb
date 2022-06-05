@@ -1,0 +1,31 @@
+<h1>Positions</h1>
+
+<%= button_to 'Update positions', update_wallet_positions_path, class: 'btn btn-primary float-end' %>
+
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Symbol</th>
+      <th>Amount</th>
+      <th>Price</th>
+      <th>Holdings</th>
+      <th>Staking %</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @positions.each do |pos| %>
+      <tr>
+        <td><%= pos[:symbol] %></td>
+        <td><%= pos[:amount] %></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>
+          <%= link_to 'Edit', 'javascript:;', data: { id: pos.id, amount: pos.amount, symbol: pos.symbol }, class: 'btn btn-secondary' %>
+          <%= link_to 'Destroy', staked_positions_path(pos), data: { turbo_method: :delete, turbo_confirm: 'Are you sure?' }, class: 'btn btn-danger' %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
