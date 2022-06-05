@@ -28,6 +28,9 @@ gem 'pg', '~> 1.2.3'
 gem 'binance-connector-ruby', github: 'jafuentest/binance-connector-ruby', branch: 'get-convert-history'
 # User registrations
 gem 'devise'
+# Background jobs
+gem 'delayed_job_active_record'
+gem 'delayed_job_recurring'
 
 # Build JSON APIs with ease [https://github.com/rails/jbuilder]
 gem 'jbuilder'
@@ -76,6 +79,7 @@ group :development do
   gem 'capistrano'
   gem 'capistrano3-puma'
   gem 'capistrano-bundler'
+  gem 'capistrano-delayed-job'
   gem 'capistrano-rails'
   gem 'capistrano-rvm'
 end

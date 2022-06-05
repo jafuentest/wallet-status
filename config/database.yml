@@ -19,7 +19,9 @@ default: &default
   encoding: unicode
   # For details on connection pooling, see Rails configuration guide
   # https://guides.rubyonrails.org/configuring.html#database-pooling
-  pool: <%= ENV.fetch('RAILS_MAX_THREADS') { 5 } %>
+
+  # We're using using threads for API fetch operations, that's the reason for 25
+  pool: <%= [ENV.fetch('RAILS_MAX_THREADS', 5), 25].max %>
 
 development:
   <<: *default
