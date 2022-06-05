@@ -1,5 +1,6 @@
 module WalletBalanceService::SpotTrades
   def fetch_pair_trades(symbol, pair)
+    retries = 0
     log_spot_trade(pair)
 
     my_trades = client.my_trades(symbol: symbol, orderId: last_spot_trade(symbol))
@@ -7,8 +8,9 @@ module WalletBalanceService::SpotTrades
 
     last_order_id = my_trades.last&.dig(:orderId) || return
     @wallet.update(api_details: @wallet.api_details.merge("#{symbol}_last_spot_order_id" => last_order_id))
-  rescue SocketError, Faraday::ConnectionFailed, ActiveRecord::ConnectionTimeoutError => e
+  rescue StandardError => e
     Rails.logger.error "Error fetching trades for #{symbol}: #{e}"
+    retry if (retries += 1) <= 3
   end
 
   def fetch_spot_trades
@@ -23,7 +25,7 @@ module WalletBalanceService::SpotTrades
       threads = pairs_batch.map { |e| Thread.new { fetch_pair_trades(e[0], e[1]) } }
       threads.each(&:join)
 
-      # Sleep for a minute to prevent API ban
+      # Sleep for a quarter minute to prevent API ban by staying under 100 calls/min
       sleep(15 - (Time.zone.now - start)) unless i == slices.size - 1
     end
   end
@@ -32,7 +34,7 @@ module WalletBalanceService::SpotTrades
 
   def available_pairs(parent_symbol, slice_size: nil)
     slices = YAML.load_file(Rails.root.join('config', 'trading_pairs', "#{parent_symbol}.yml"))
-    slices = slices.each_pair.reduce({}) { |h, (k, v)| h.merge(v) } if parent_symbol == 'others'
+    slices = slices.each_pair.reduce({}) { |h, (_k, v)| h.merge(v) } if parent_symbol == 'others'
     return slices if slice_size.nil?
 
     slices.each_slice(slice_size)
