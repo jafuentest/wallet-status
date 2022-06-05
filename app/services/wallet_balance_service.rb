@@ -26,13 +26,13 @@ class WalletBalanceService
   end
 
   def savings_wallet
-    @savings_wallet ||= client.savings_account[:positionAmountVos]
+    @savings_wallet ||= client.savings_account(recvWindow: 60_000)[:positionAmountVos]
       .select { |e| e[:amount].to_f.positive? }
       .each { |e| e[:amount] = e[:amount].to_f }
   end
 
   def spot_wallet
-    @spot_wallet ||= client.account[:balances]
+    @spot_wallet ||= client.account(recvWindow: 60_000)[:balances]
       .select { |e| normal_spot_balance(e) }
       .each { |e| e[:free] = e[:free].to_f }
   end
@@ -49,7 +49,7 @@ class WalletBalanceService
 
   def tickers
     Rails.cache.fetch('tickers', expires_in: 10.minutes) do
-      @tickers = client.ticker_price
+      @tickers = client.ticker_price(recvWindow: 60_000)
     end
   end
 

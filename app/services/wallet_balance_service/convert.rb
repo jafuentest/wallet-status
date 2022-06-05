@@ -4,7 +4,11 @@ module WalletBalanceService::Convert
       log_convert
       break if (Time.current - start_convert) < 1.minute
 
-      converts = client.convert_trade_flow(startTime: start_convert.strftime('%Q'), endTime: end_convert.strftime('%Q'))
+      converts = client.convert_trade_flow(
+        recvWindow: 60_000,
+        startTime: start_convert.strftime('%Q'), endTime: end_convert.strftime('%Q')
+      )
+
       converts[:list].each { |convertion| create_transaction_from_convertion(convertion) }
       update_wallet
     end
