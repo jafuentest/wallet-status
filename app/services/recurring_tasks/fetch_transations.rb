@@ -4,7 +4,7 @@ class RecurringTasks::FetchTransations
   run_every 12.hours
   run_at '12:00', '0:00'
 
-  def perform # rubocop:disable Metrics/MethodLength
+  def perform
     Rails.logger.info 'Creating fetch transations jobs'
 
     User.all.each do |user|
