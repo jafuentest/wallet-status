@@ -5,7 +5,7 @@ Rails.application.routes.draw do
 
   devise_for :users
 
-  resources :positions do
+  resources :positions, only: [:index] do
     post :update_wallet, on: :collection
   end
 
