@@ -5,19 +5,13 @@ class RecurringTasks::FetchTransations
   run_at '12:00', '0:00'
 
   def perform # rubocop:disable Metrics/MethodLength
-    Rails.logger.info 'Fetching transations'
+    Rails.logger.info 'Creating fetch transations jobs'
 
     User.all.each do |user|
-      Rails.logger.info "Fetching transations for user id: #{user.id}"
       binance = WalletBalanceService.new(user)
 
-      Rails.logger.info "Fetching spot trades for user id: #{user.id}"
       binance.delay.fetch_spot_trades
-
-      Rails.logger.info "Fetching convertion trades for user id: #{user.id}"
       binance.delay.fetch_converts
-
-      Rails.logger.info "Fetching margin transfers for user id: #{user.id}"
       binance.delay.fetch_margin_transfers
     end
   end
