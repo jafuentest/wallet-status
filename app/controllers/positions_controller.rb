@@ -17,6 +17,11 @@ class PositionsController < ApplicationController
   end
 
   def create_staking
+    if (@position = current_user.binance_wallet.positions.staking.new).save
+      return @alert = { type: :success, message: 'Created' }
+    end
+
+    @alert = { type: :error, message: "Error creating staking position: #{@position.errors.to_a.join(', ')}" }
   end
 
   def update_staking
