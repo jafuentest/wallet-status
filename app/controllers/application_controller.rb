@@ -8,6 +8,11 @@ class ApplicationController < ActionController::Base
     render file: 'public/404.html'
   end
 
+  def alert(type: 'success', message:)
+    @alert = { type: type, message: message }
+    render 'alert', layout: nil
+  end
+
   private
 
   def current_action
