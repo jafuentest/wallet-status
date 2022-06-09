@@ -19,6 +19,6 @@ class ApplicationController < ActionController::Base
     return not_found if current_action == 'not_found'
 
     flash[:notice] = 'Please try again.'
-    redirect_to request.referer.present? ? request.referer : root_path
+    redirect_to request.referer.presence || root_path
   end
 end
