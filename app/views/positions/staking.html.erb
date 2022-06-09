@@ -45,7 +45,16 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <p>Create stake form goes here.</p>
+          <div id="create_staking_alert_container" class="my-2"></div>
+
+          <div class="mb-3">
+            <%= f.label :symbol, class: 'form-label' %>
+            <%= f.text_field :symbol, class: 'form-control' %>
+          </div>
+          <div class="mb-3">
+            <%= f.label :amount, class: 'form-label' %>
+            <%= f.number_field :amount, class: 'form-control' %>
+          </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
