@@ -29,11 +29,11 @@
         <td></td>
         <td>
           <%= link_to 'Edit', 'javascript:;', data: { id: pos.id, amount: pos.amount, symbol: pos.symbol }, class: 'btn btn-secondary' %>
-          <%= link_to 'Destroy', staked_positions_path(pos), data: { turbo_method: :delete, turbo_confirm: 'Are you sure?' }, class: 'btn btn-danger' %>
+          <%= link_to 'Destroy', staking_path(pos), data: { turbo_method: :delete, turbo_confirm: 'Are you sure?' }, class: 'btn btn-danger' %>
         </td>
       </tr>
     <% end %>
   </tbody>
 </table>
 
-<%= render 'staking_form_modal', position: Position.staking.new %>
+<%= render 'form_modal', position: Position.staking.new %>

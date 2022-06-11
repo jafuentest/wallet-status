@@ -7,12 +7,9 @@ Rails.application.routes.draw do
 
   resources :positions do
     collection do
-      post :update_wallet
+      resources :staking
 
-      get :staking
-      post :staking, action: 'create_staking'
-      patch 'stake/:id', action: 'update_staking', as: :staked
-      delete 'stake/:id', action: 'destroy_staking'
+      post :update_wallet
     end
   end
 
