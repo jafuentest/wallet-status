@@ -9,8 +9,7 @@ class StakingController < ApplicationController
   def new
   end
 
-  def edit
-  end
+  def edit; end
 
   def create
     @position = current_user.binance_wallet.positions.staking
