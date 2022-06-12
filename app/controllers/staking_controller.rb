@@ -23,15 +23,19 @@ class StakingController < ApplicationController
     end
 
     @position.amount = staking_params[:amount]
-    return @alert = { type: :success, message: 'Created' } if @position.save
+    return redirect_to staking_index_path if @position.save
 
     @alert = { type: :error, message: "Error creating staking position: #{@position.errors.to_a.join(', ')}" }
   end
 
   def update
+    @position.update(staking_params)
+    redirect_to staking_index_path
   end
 
   def destroy
+    @position.destroy
+    redirect_to staking_index_path, status: :see_other
   end
 
   private
