@@ -1,5 +1,6 @@
 class ApplicationController < ActionController::Base
   rescue_from ActionController::InvalidAuthenticityToken, with: :redirect_to_referer_or_root
+  add_flash_types :success, :error, :warning
 
   def not_found
     Rails.logger.info "Got not_found for #{request.method} #{request.path}"

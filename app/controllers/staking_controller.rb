@@ -19,21 +19,28 @@ class StakingController < ApplicationController
       .find_or_initialize_by(staking_params.slice(:symbol))
 
     if @position.persisted?
-      return @alert = { type: :error, message: "Staking for #{staking_params[:symbol]} already exists" }
+      flash[:warning] = "Staking for #{staking_params[:symbol]} already exists"
+      return redirect_to staking_index_path
     end
 
     @position.amount = staking_params[:amount]
-    return redirect_to staking_index_path if @position.save
 
-    @alert = { type: :error, message: "Error creating staking position: #{@position.errors.to_a.join(', ')}" }
+    if @position.save
+      flash[:success] = "Staking position created: #{@position.amount} #{@position.symbol}"
+    else
+      flash[:warning] = "Error creating staking position: #{@position.errors.to_a.join(', ')}"
+    end
+    redirect_to staking_index_path
   end
 
   def update
     @position.update(staking_params)
+    flash[:success] = "Staking position updated: #{@position.amount} #{@position.symbol}"
     redirect_to staking_index_path
   end
 
   def destroy
+    flash[:success] = "Staking position removed: #{@position.symbol}"
     @position.destroy
     redirect_to staking_index_path, status: :see_other
   end
