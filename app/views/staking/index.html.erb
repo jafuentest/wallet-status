@@ -1,9 +1,7 @@
 <h1>Positions</h1>
 
 <div class="d-flex flex-row-reverse">
-  <button type="button" class="btn btn-primary " data-bs-toggle="modal" data-bs-target="#staking_form_modal .modal">
-    Add Staking Position
-  </button>
+  <%= link_to 'Add Staking Position', new_staking_path, data: { turbo_frame: 'staking_form_modal' }, class: 'btn btn-primary' %>
 </div>
 
 <div id="alert_container" class="my-2"></div>
@@ -36,4 +34,4 @@
   </tbody>
 </table>
 
-<%= render 'form_modal', position: Position.staking.new %>
+<%= render 'form_modal', position: Position.new %>

@@ -7,9 +7,12 @@ class StakingController < ApplicationController
   end
 
   def new
+    render partial: 'form_modal', locals: { position: Position.new }
   end
 
-  def edit; end
+  def edit
+    render partial: 'form_modal', locals: { position: @position }
+  end
 
   def create
     @position = current_user.binance_wallet.positions.staking

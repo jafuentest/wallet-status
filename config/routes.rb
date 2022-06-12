@@ -7,7 +7,7 @@ Rails.application.routes.draw do
 
   resources :positions do
     collection do
-      resources :staking
+      resources :staking, except: [:show]
 
       post :update_wallet
     end
