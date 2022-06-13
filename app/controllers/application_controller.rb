@@ -19,7 +19,7 @@ class ApplicationController < ActionController::Base
   def redirect_to_referer_or_root
     return not_found if current_action == 'not_found'
 
-    flash[:notice] = 'Please try again.'
+    flash[:warning] = 'Please try again.'
     redirect_to request.referer.presence || root_path
   end
 end

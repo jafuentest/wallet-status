@@ -51,6 +51,9 @@ Metrics/MethodLength:
 Rails/CreateTableWithTimestamps:
   Enabled: false
 
+Rails/I18nLocaleTexts:
+  Enabled: false
+
 Rails/SkipsModelValidations:
   Enabled: false
 

@@ -1,6 +1,7 @@
 class StakingController < ApplicationController
-  # before_action :authenticate_user!
+  before_action :authenticate_user!
   before_action :set_staking, only: %i[edit update destroy]
+  before_action :first_or_initialize_position, only: %i[create]
 
   def index
     @positions = current_user.positions.staking.sort_by { |e| e[:symbol] }
@@ -15,14 +16,6 @@ class StakingController < ApplicationController
   end
 
   def create
-    @position = current_user.binance_wallet.positions.staking
-      .find_or_initialize_by(staking_params.slice(:symbol))
-
-    if @position.persisted?
-      flash[:warning] = "Staking for #{staking_params[:symbol]} already exists"
-      return redirect_to staking_index_path
-    end
-
     @position.amount = staking_params[:amount]
 
     if @position.save
@@ -30,6 +23,7 @@ class StakingController < ApplicationController
     else
       flash[:warning] = "Error creating staking position: #{@position.errors.to_a.join(', ')}"
     end
+
     redirect_to staking_index_path
   end
 
@@ -46,6 +40,16 @@ class StakingController < ApplicationController
   end
 
   private
+
+  def first_or_initialize_position
+    @position = current_user.binance_wallet.positions.staking
+      .find_or_initialize_by(staking_params.slice(:symbol))
+
+    return unless @position.persisted?
+
+    flash[:warning] = "Staking for #{staking_params[:symbol]} already exists"
+    redirect_to staking_index_path
+  end
 
   def set_staking
     @position = current_user.binance_wallet.positions.find(params[:id])

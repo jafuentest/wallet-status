@@ -12,6 +12,7 @@
 
   <body>
     <div class="container">
+      <%= bootstrap_alert unless flash.empty? %>
       <%= yield %>
     </div>
   </body>
