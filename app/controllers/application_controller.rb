@@ -1,5 +1,6 @@
 class ApplicationController < ActionController::Base
   rescue_from ActionController::InvalidAuthenticityToken, with: :redirect_to_referer_or_root
+  add_flash_types :success, :error, :warning
 
   def not_found
     Rails.logger.info "Got not_found for #{request.method} #{request.path}"
@@ -18,7 +19,7 @@ class ApplicationController < ActionController::Base
   def redirect_to_referer_or_root
     return not_found if current_action == 'not_found'
 
-    flash[:notice] = 'Please try again.'
-    redirect_to request.referer.present? ? request.referer : root_path
+    flash[:warning] = 'Please try again.'
+    redirect_to request.referer.presence || root_path
   end
 end

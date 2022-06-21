@@ -1,0 +1,35 @@
+<h1>Positions</h1>
+
+<div class="d-flex flex-row-reverse">
+  <%= link_to 'Add Staking Position', new_staking_path, data: { turbo_frame: 'staking_form_modal' }, class: 'btn btn-primary' %>
+</div>
+
+<table class="table table-striped" data-controller="staking">
+  <thead>
+    <tr>
+      <th>Symbol</th>
+      <th>Amount</th>
+      <th>Price</th>
+      <th>Holdings</th>
+      <th>Staking %</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @positions.each do |pos| %>
+      <tr>
+        <td><%= pos[:symbol] %></td>
+        <td><%= pos[:amount] %></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>
+          <%= link_to 'Edit', edit_staking_path(pos), data: { turbo_frame: 'staking_form_modal' }, class: 'btn btn-secondary' %>
+          <%= link_to 'Destroy', staking_path(pos), data: { turbo_method: :delete, turbo_confirm: 'Are you sure?' }, class: 'btn btn-danger' %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<%= render 'form_modal', position: Position.new %>
