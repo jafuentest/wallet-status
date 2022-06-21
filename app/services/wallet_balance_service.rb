@@ -39,13 +39,18 @@ class WalletBalanceService
 
   def usd_balances
     @user.positions.select('symbol, SUM(amount) AS amount').group(:symbol).map do |pos|
-      price_hash = tickers.find { |e| e[:symbol] == "#{pos[:symbol]}USDT" }
+      price_hash = tickers.find { |e| e[:symbol] == price(pos)}
       price = price_hash ? price_hash[:price].to_f : 1.0
       pos.attributes.merge(price: price, value: (pos.amount * price).round(2)).symbolize_keys
     end
   end
 
   private
+
+  def price(pos)
+    traded_against = pos[:symbol] == 'LUNC' ? 'BUSD' : 'USDT'
+    "#{pos[:symbol]}#{traded_against}"
+  end
 
   def tickers
     Rails.cache.fetch('tickers', expires_in: 10.minutes) do
