@@ -19,14 +19,13 @@ module WalletBalanceService::SpotTrades
   end
 
   def fetch_trades_on(parent_symbol)
-    slices = available_pairs(parent_symbol, slice_size: 25)
-    slices.with_index do |pairs_batch, i|
-      start = Time.zone.now
-      threads = pairs_batch.map { |e| Thread.new { fetch_pair_trades(e[0], e[1]) } }
-      threads.each(&:join)
+    slices = YAML.load_file(Rails.root.join('config', 'trading_pairs', "#{parent_symbol}.yml"))
+    slices = slices.each_pair.reduce({}) { |h, (_k, v)| h.merge(v) } if parent_symbol == 'others'
+    run_at = Time.zone.now
 
-      # Sleep for a quarter minute to prevent API ban by staying under 100 calls/min
-      sleep(15 - (Time.zone.now - start)) unless i == slices.size - 1
+    slices.each do |pair|
+      Delayed::Job.enqueue fetch_pair_trades(pair[0], pair[1], run_at: run_at)
+      run_at += 0.5.seconds
     end
   end
 
