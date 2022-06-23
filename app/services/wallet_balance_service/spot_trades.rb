@@ -1,6 +1,6 @@
 module WalletBalanceService::SpotTrades
-  def fetch_pair_trades(symbol, pair)
-    retries = 0
+  def fetch_pair_trades(trade_pair)
+    symbol, pair = trade_pair
     log_spot_trade(pair)
 
     my_trades = client.my_trades(recvWindow: 60_000, symbol: symbol, orderId: last_spot_trade(symbol))
@@ -10,23 +10,20 @@ module WalletBalanceService::SpotTrades
     @wallet.update(api_details: @wallet.api_details.merge("#{symbol}_last_spot_order_id" => last_order_id))
   rescue StandardError => e
     Rails.logger.error "Error fetching trades for #{symbol}: #{e}"
-    retry if (retries += 1) <= 3
+    raise
   end
 
   def fetch_spot_trades
-    parent_symbols = %w[bnb btc busd eth others usdc usdt]
-    parent_symbols.each { |symbol| fetch_trades_on(symbol) }
-  end
+    run_at = Time.zone.now
 
-  def fetch_trades_on(parent_symbol)
-    slices = available_pairs(parent_symbol, slice_size: 25)
-    slices.with_index do |pairs_batch, i|
-      start = Time.zone.now
-      threads = pairs_batch.map { |e| Thread.new { fetch_pair_trades(e[0], e[1]) } }
-      threads.each(&:join)
+    %w[usdt busd usdc btc eth bnb others].each do |parent_symbol|
+      slices = YAML.load_file Rails.root.join('config', 'trading_pairs', "#{parent_symbol}.yml")
+      slices = slices.each_pair.reduce({}) { |h, (_k, v)| h.merge(v) } if parent_symbol == 'others'
 
-      # Sleep for a quarter minute to prevent API ban by staying under 100 calls/min
-      sleep(15 - (Time.zone.now - start)) unless i == slices.size - 1
+      slices.each do |pair|
+        # Spread calls to binance client to prevent API lock from excessive calls
+        delay(run_at: run_at += 0.5.seconds).fetch_pair_trades(pair)
+      end
     end
   end
 
