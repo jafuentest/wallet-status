@@ -45,6 +45,16 @@ class WalletBalanceService
     end
   end
 
+  def updated_symbols
+    symbols = %w[usdt busd usdc btc eth bnb others].reduce([]) do |syms, parent_symbol|
+      slices = YAML.load_file Rails.root.join('config', 'trading_pairs', "#{parent_symbol}.yml")
+      slices = slices.each_pair.reduce({}) { |h, (_k, v)| h.merge(v) } if parent_symbol == 'others'
+      syms << slices.map(&:first)
+    end
+
+    symbols.flatten
+  end
+
   private
 
   def price(pos)
