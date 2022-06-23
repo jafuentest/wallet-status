@@ -4,7 +4,7 @@ Rails.application.routes.draw do
   # Defines the root path route ('/')
   root 'positions#index'
 
-  authenticated :user, -> user { user.id == 1 } do
+  authenticated :user, ->(user) { user.id == 1 } do
     mount Delayed::Web::Engine, at: '/jobs'
   end
 
