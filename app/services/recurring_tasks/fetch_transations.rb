@@ -2,7 +2,7 @@ class RecurringTasks::FetchTransations
   include Delayed::RecurringJob
 
   run_every 1.day
-  run_at '16:00', '4:00'
+  run_at '18:00', '6:00'
 
   def perform
     Rails.logger.info 'Creating fetch transations jobs'
