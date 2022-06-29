@@ -22,7 +22,7 @@ module WalletBalanceService::SpotTrades
 
       slices.each do |pair|
         # Spread calls to binance client to prevent API lock from excessive calls
-        delay(run_at: run_at += 0.5.seconds).fetch_pair_trades(pair)
+        delay(run_at: run_at += 0.6.seconds).fetch_pair_trades(pair)
       end
     end
   end
