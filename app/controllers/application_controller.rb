@@ -1,5 +1,7 @@
 class ApplicationController < ActionController::Base
   rescue_from ActionController::InvalidAuthenticityToken, with: :redirect_to_referer_or_root
+  rescue_from ActionController::InvalidCrossOriginRequest, with: :redirect_to_referer_or_root
+
   add_flash_types :success, :error, :warning
 
   def not_found
