@@ -31,6 +31,7 @@ jobs:
 
       - name: Setup Database
         env:
+          GITHUB: true
           RAILS_ENV: test
           PGHOST: localhost
           PGUSER: postgres
@@ -38,6 +39,7 @@ jobs:
 
       - name: Run tests with rspec
         env:
+          GITHUB: true
           RAILS_ENV: test
           PGHOST: localhost
           PGUSER: postgres
