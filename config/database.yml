@@ -60,6 +60,7 @@ development:
 test:
   <<: *default
   database: wallet_status_test
+  <%= 'password: postgres' if ENV.fetch('GITHUB', nil).present? %>
 
 # As with config/credentials.yml, you never want to store sensitive information,
 # like your database password, in your source code. If your source code is
@@ -86,7 +87,7 @@ production:
   database: wallet_status_production
   username: wallet_status
 
-  <% unless ENV.fetch('PROVIDER', '').casecmp('heroku').zero? %>
+  <% unless ENV.fetch('PROVIDER', '').casecmp('heroku').zero? || !Rails.env.production? %>
   password: <%= Rails.application.credentials.pg[:password] %>
   host:     <%= Rails.application.credentials.pg[:host] %>
   port:     <%= Rails.application.credentials.pg[:port] %>
