@@ -6,10 +6,12 @@ application up and running.
 Things you may want to cover:
 
 * Ruby version
+  MRI 3.0.0
 
 * System dependencies
+  PostgreSQL 13.3 or higher
 
-* Configuration
+<!-- * Configuration -->
 
 * Database creation
   ```
@@ -18,11 +20,12 @@ Things you may want to cover:
   GRANT ALL PRIVILEGES ON DATABASE wallet_status_production TO wallet_status;
   ```
 
-* Database initialization
+<!-- * Database initialization -->
 
-* How to run the test suite
+<!-- * How to run the test suite -->
 
-* Services (job queues, cache servers, search engines, etc.)
+* Services <!-- (job queues, cache servers, search engines, etc.) -->
+  * Uses Delayed Job for background tasks
 
 * Deployment instructions
   * Make sure you have installed base dependencies in your server
