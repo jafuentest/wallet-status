@@ -6,10 +6,10 @@ application up and running.
 Things you may want to cover:
 
 * Ruby version
-  MRI 3.0.0
+  * MRI 3.0.0
 
 * System dependencies
-  PostgreSQL 13.3 or higher
+  * PostgreSQL 13.3 or higher
 
 <!-- * Configuration -->
 
