@@ -56,6 +56,8 @@ Things you may want to cover:
   # Sets up Nginx
   cp ./ops/wallet_status.conf /etc/nginx/conf.d
   # Create the certificate
+  # https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/SSL-on-amazon-linux-2.html#letsencrypt
+
   service nginx restart
   ```
 
