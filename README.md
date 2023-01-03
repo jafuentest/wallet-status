@@ -55,6 +55,7 @@ Things you may want to cover:
 
   # Sets up Nginx
   cp ./ops/wallet_status.conf /etc/nginx/conf.d
+  # Create the certificate
   service nginx restart
   ```
 
