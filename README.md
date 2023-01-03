@@ -10,6 +10,10 @@ Things you may want to cover:
 
 * System dependencies
   * PostgreSQL 13.3 or higher
+  * Before attempting Capistrano deploy:
+    * Install rvm + Ruby version
+    * Install Postgres developer package
+    * Install NodeJS + Yarn
 
 <!-- * Configuration -->
 
