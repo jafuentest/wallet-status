@@ -48,13 +48,16 @@ Things you may want to cover:
   * Now go to your server and:
   ```
   # Assuming you installed the app on your /home/your-user/wallet_status
+  mkdir -p ~/wallet_status/shared/config
+  scp -i ~/.ssh/wikifuentes.pem config/master.key ec2-user@wallet_status.wikifuentes.com:~/wallet_status/shared/config
+
   cd ~/wallet_status/current
 
   # Sets up the puma service
-  cp ./ops/puma_wallet_status.service /etc/systemd/system
+  cp ./ops/puma_eve_industrial.service /etc/systemd/system
 
   # Sets up Nginx
-  cp ./ops/wallet_status.conf /etc/nginx/conf.d
+  cp ./ops/eve_industrial.conf /etc/nginx/conf.d
 
   # Create the certificate
   # https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/SSL-on-amazon-linux-2.html#letsencrypt
