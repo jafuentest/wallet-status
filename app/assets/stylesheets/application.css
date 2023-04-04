@@ -1,3 +1,7 @@
 .border-none {
   border: none !important;
 }
+
+.form-btn {
+  display: inline-block;
+}
