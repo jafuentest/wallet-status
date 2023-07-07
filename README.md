@@ -11,51 +11,66 @@ Things you may want to cover:
 * System dependencies
   * PostgreSQL 13.3 or higher
 
-<!-- * Configuration -->
-
-* Database creation
-  ```
-  CREATE DATABASE wallet_status_production;
-  CREATE USER wallet_status WITH ENCRYPTED PASSWORD '<secure-password>';
-  GRANT ALL PRIVILEGES ON DATABASE wallet_status_production TO wallet_status;
-  ```
-
-<!-- * Database initialization -->
-
-<!-- * How to run the test suite -->
-
 * Services <!-- (job queues, cache servers, search engines, etc.) -->
   * Uses Delayed Job for background tasks
 
-* Deployment instructions
-  * Make sure you have installed base dependencies in your server
+## Capistrano deployment
 
-  * Store the appropiate ssh key on your own PC
-  ```
-  ~/.ssh/wallet-status.pem
-  ```
+1. Install basic dependencies
+  * Postgres server
+  * rvm + Ruby version
+  * NodeJS + Yarn
+  * Postgres devel package
 
-  * Run capistrano deploy. If if fails just continue with the steps and try
-  again at the end
-  ```
-  cap production deploy
-  ```
+2. Ensure ssh key exists and is available
+    ```
+    ~/.ssh/wallet-status.pem
+    ```
 
-  * Now go to your server and:
-  ```
-  # Assuming you installed the app on your /home/your-user/wallet_status
-  cd ~/wallet_status/current
+3. Login to the psql shell with root privileges
+    ```
+    CREATE DATABASE wallet_status_production;
+    CREATE USER wallet_status WITH ENCRYPTED PASSWORD '<secure-password>';
+    GRANT ALL PRIVILEGES ON DATABASE wallet_status_production TO wallet_status;
+    ```
 
-  # Sets up the puma service
-  cp ./ops/puma_wallet_status.service /etc/systemd/system
+4. Copy system configuration files. Assuming that:
+  * The cap deploy_to dir is `~/wallet_status`
+  * The domain is `wallet_status.wikifuentes.com`
+    ```
+    mkdir -p ~/wallet_status/shared/config
 
-  # Sets up Nginx
-  cp ./ops/wallet_status.conf /etc/nginx/conf.d
-  service nginx restart
-  ```
+    # Copies the master key to decrypt rails secrets
+    scp -i ~/.ssh/wikifuentes.pem config/master.key ec2-user@wallet-status.wikifuentes.com:~/wallet_status/shared/config
 
-  * Run seeds (after a successful deployment)
-  ```
-  cd ~/wallet_status/current
-  RAILS_ENV="production" bundle exec rails db:seed
-  ```
+    # Sets up the puma service
+    scp -i ~/.ssh/wikifuentes.pem ops/wallet_status.conf ec2-user@wallet-status.wikifuentes.com:/etc/nginx/conf.d
+
+    # Sets up Nginx
+    scp -i ~/.ssh/wikifuentes.pem ops/puma_wallet_status.service ec2-user@wallet-status.wikifuentes.com:/etc/systemd/system
+    ```
+
+5. Deploy!
+    ```
+    cap production deploy
+    ```
+
+6. Now ssh to the server `ssh -i ~/.ssh/wikifuentes.pem ec2-user@wallet-status.wikifuentes.com` and
+  * Create and setup the SSL certificate https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/SSL-on-amazon-linux-2.html#letsencrypt
+
+  * Patch app files permissions (This is lazy way, for a safer way the app should be outside home, like `/var/www/`)
+    ```
+    chmod +x ~
+    chmod +x ~/wallet_status -R
+    ```
+
+  * Restart Nginx
+    ```
+    sudo service nginx restart
+    ```
+
+7. Initialize the database
+    ```
+    cd ~/wallet_status/current
+    RAILS_ENV="production" bundle exec rails db:seed
+    ```
