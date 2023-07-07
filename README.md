@@ -17,7 +17,7 @@ Things you may want to cover:
 ## Capistrano deployment
 
 1. Install basic dependencies
-  * Postgres server (local or remote)
+  * Postgres server
   * rvm + Ruby version
   * NodeJS + Yarn
   * Postgres devel package
@@ -29,28 +29,25 @@ Things you may want to cover:
 
 3. Login to the psql shell with root privileges
     ```
-    CREATE DATABASE eve_industrial_production;
+    CREATE DATABASE wallet_status_production;
     CREATE USER wallet_status WITH ENCRYPTED PASSWORD '<secure-password>';
-    GRANT ALL PRIVILEGES ON DATABASE eve_industrial_production TO wallet_status;
+    GRANT ALL PRIVILEGES ON DATABASE wallet_status_production TO wallet_status;
     ```
 
-4. Copy SPECIAL? files. Assuming that:
+4. Copy system configuration files. Assuming that:
   * The cap deploy_to dir is `~/wallet_status`
   * The domain is `wallet_status.wikifuentes.com`
     ```
     mkdir -p ~/wallet_status/shared/config
 
     # Copies the master key to decrypt rails secrets
-    scp -i ~/.ssh/wikifuentes.pem config/master.key ec2-user@wallet-status
-  .wikifuentes.com:~/wallet_status/shared/config
+    scp -i ~/.ssh/wikifuentes.pem config/master.key ec2-user@wallet-status.wikifuentes.com:~/wallet_status/shared/config
 
     # Sets up the puma service
-    scp -i ~/.ssh/wikifuentes.pem ops/wallet_status.conf ec2-user@wallet-status
-  .wikifuentes.com:/etc/nginx/conf.d
+    scp -i ~/.ssh/wikifuentes.pem ops/wallet_status.conf ec2-user@wallet-status.wikifuentes.com:/etc/nginx/conf.d
 
     # Sets up Nginx
-    scp -i ~/.ssh/wikifuentes.pem ops/puma_eve_industrial.service ec2-user@wallet-status
-  .wikifuentes.com:/etc/systemd/system
+    scp -i ~/.ssh/wikifuentes.pem ops/puma_wallet_status.service ec2-user@wallet-status.wikifuentes.com:/etc/systemd/system
     ```
 
 5. Deploy!
@@ -61,7 +58,7 @@ Things you may want to cover:
 6. Now ssh to the server `ssh -i ~/.ssh/wikifuentes.pem ec2-user@wallet-status.wikifuentes.com` and
   * Create and setup the SSL certificate https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/SSL-on-amazon-linux-2.html#letsencrypt
 
-  * Patch app files permissions (This is lazy way, for safe way app should be outside home, like `/var/www/`)
+  * Patch app files permissions (This is lazy way, for a safer way the app should be outside home, like `/var/www/`)
     ```
     chmod +x ~
     chmod +x ~/wallet_status -R
@@ -77,7 +74,3 @@ Things you may want to cover:
     cd ~/wallet_status/current
     RAILS_ENV="production" bundle exec rails db:seed
     ```
-
-<!-- * Configuration -->
-
-<!-- * How to run the test suite -->
