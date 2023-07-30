@@ -15,6 +15,18 @@ ActiveRecord::Schema[7.0].define(version: 2025_01_25_212947) do
   enable_extension "hstore"
   enable_extension "plpgsql"
 
+  create_table "cost_basis_logs", force: :cascade do |t|
+    t.bigint "transaction_id", null: false
+    t.float "cost_basis"
+    t.string "asset"
+    t.datetime "timestamp"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["asset"], name: "index_cost_basis_logs_on_asset", unique: true
+    t.index ["timestamp"], name: "index_cost_basis_logs_on_timestamp", unique: true
+    t.index ["transaction_id"], name: "index_cost_basis_logs_on_transaction_id"
+  end
+
   create_table "delayed_jobs", force: :cascade do |t|
     t.integer "priority", default: 0, null: false
     t.integer "attempts", default: 0, null: false
@@ -88,6 +100,7 @@ ActiveRecord::Schema[7.0].define(version: 2025_01_25_212947) do
     t.index ["user_id"], name: "index_wallets_on_user_id"
   end
 
+  add_foreign_key "cost_basis_logs", "transactions"
   add_foreign_key "positions", "wallets"
   add_foreign_key "transactions", "wallets"
   add_foreign_key "wallets", "users"
