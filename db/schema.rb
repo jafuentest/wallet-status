@@ -18,6 +18,7 @@ ActiveRecord::Schema[7.0].define(version: 2025_01_25_212947) do
   create_table "cost_basis_logs", force: :cascade do |t|
     t.bigint "transaction_id", null: false
     t.float "cost_basis"
+    t.float "amount"
     t.string "asset"
     t.datetime "timestamp"
     t.datetime "created_at", null: false
