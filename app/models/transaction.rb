@@ -22,6 +22,8 @@
 class Transaction < ApplicationRecord
   belongs_to :wallet
 
+  has_many :cost_basis_logs, dependent: :destroy
+
   scope :convertions, -> { where(order_type: 'convert') }
   scope :margin_transfers, -> { where(order_type: 'margin_transfer') }
   scope :spot_trades, -> { where(order_type: 'spot_trade') }

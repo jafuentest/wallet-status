@@ -28,8 +28,9 @@ module WalletBalanceService::CostBasisCalculator
   end
 
   def get_current_cost_basis(amount, asset)
-    CostBasisLog.where(asset: asset)
-      .order(timestamp: :asc)
-      .last.cost_basis
+    latest_log = user.binance_wallet.cost_basis_logs.where(asset: asset)
+      .order(timestamp: :desc)
+      .first
+      .cost_basis
   end
 end
