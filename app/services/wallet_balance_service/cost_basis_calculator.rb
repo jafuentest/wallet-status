@@ -5,14 +5,35 @@ module WalletBalanceService::CostBasisCalculator
     scope.each do |t|
       break if order_type == 'spot_trade'
 
-      current_cost_basis = get_cost(t.from_amount, t.from_asset)
-      raise RuntimeError.new('Missing cost basis of origin asset') if current_cost_basis
+      # Get the cost of the transaction
+      t_cost_basis = get_cost(t.from_amount, t.from_asset)
+      raise RuntimeError.new('Missing cost basis of origin asset') if t_cost_basis.blank?
 
-      # update from_cost
-      # update to_cost
+      ActiveRecord::Base.transaction do
+        # Substract from purchasing asset's cost basis
+        unless FIAT_CURRENCIES.include?(t.from_asset)
+          latest = latest_asset_log(t.from_asset)
+          CostBasisLog.create!(
+            generating_transaction: t,
+            cost_basis: latest.cost_basis - t_cost_basis,
+            total_amount: latest.total_amount - t.from_amount,
+            asset: t.from_asset,
+            timestamp: t.timestamp
+          )
+        end
 
-      CostBasisLog.new() unless just_created
+        # Add to purchased asset's cost basis
+        latest = latest_asset_log(t.from_asset)
+        CostBasisLog.create!(
+          generating_transaction: t,
+          cost_basis: latest.cost_basis + t_cost_basis,
+          total_amount: latest.total_amount + t.to_amount,
+          asset: t.to_asset,
+          timestamp: t.timestamp
+        )
 
+        t.update(from_cost_basis: t_cost_basis, fee_cost_basis: t_cost_basis)
+      end
     end
   end
 
@@ -39,11 +60,7 @@ module WalletBalanceService::CostBasisCalculator
       .order(timestamp: :desc)
       .first
   end
-
-  def get_current_cost_basis(amount, asset)
-    latest_log = user.binance_wallet.cost_basis_logs.where(asset: asset)
-      .order(timestamp: :desc)
-      .first
-      .cost_basis
-  end
 end
+
+# https://github.com/marketplace/actions/simplecov-action
+# https://blog.dennisokeeffe.com/blog/2022-03-12-simplecov-with-ruby-and-github-actions
