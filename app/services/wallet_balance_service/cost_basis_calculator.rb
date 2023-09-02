@@ -23,10 +23,7 @@ module WalletBalanceService::CostBasisCalculator
       return asset == 'USD' ? amount : covert_to_usd(amount, asset)
     end
 
-    cost_basis = user.binance_wallet.cost_basis_logs
-      .where(asset: asset)
-      .order(timestamp: :desc)
-      .first
+    cost_basis = latest_asset_log(asset)
 
     cost_basis.unit_cost * amount
   end
@@ -34,6 +31,13 @@ module WalletBalanceService::CostBasisCalculator
   def covert_to_usd(amount, currency)
     # Call some API tbd
     return amount
+  end
+
+  def latest_asset_log(asset)
+    user.binance_wallet.cost_basis_logs
+      .where(asset: asset)
+      .order(timestamp: :desc)
+      .first
   end
 
   def get_current_cost_basis(amount, asset)
