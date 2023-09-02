@@ -3,7 +3,7 @@ class CreateCostBasisLogs < ActiveRecord::Migration[7.0]
     create_table :cost_basis_logs do |t|
       t.references :transaction, null: false, foreign_key: true
       t.float :cost_basis
-      t.float :amount
+      t.float :total_amount
       t.string :asset
       t.datetime :timestamp
 
