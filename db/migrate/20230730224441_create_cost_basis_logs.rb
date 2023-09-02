@@ -9,8 +9,8 @@ class CreateCostBasisLogs < ActiveRecord::Migration[7.0]
 
       t.timestamps
 
-      t.index :asset, unique: true
-      t.index :timestamp, unique: true
+      t.index :asset, unique: false
+      t.index :timestamp, unique: false
     end
   end
 end

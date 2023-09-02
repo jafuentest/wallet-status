@@ -1,9 +1,13 @@
 module WalletBalanceService::CostBasisCalculator
-  FIAT_CURRENCIES = %w[USD EUR GBP RUB]
+  FIAT_CURRENCIES = %w[USDT EUR GBP RUB]
+
   def calculate_cost_basis
-    scope = user.binance_wallet.transactions.order(timestamp: :asc)
+    scope = @user.binance_wallet.transactions
+      .where(from_cost_basis: nil, to_cost_basis: nil)
+      .order(timestamp: :asc)
+
     scope.each do |t|
-      break if order_type == 'spot_trade'
+      next if t.order_type == 'margin_transfer'
 
       # Get the cost of the transaction
       t_cost_basis = get_cost(t.from_amount, t.from_asset)
@@ -14,7 +18,7 @@ module WalletBalanceService::CostBasisCalculator
         unless FIAT_CURRENCIES.include?(t.from_asset)
           latest = latest_asset_log(t.from_asset)
           CostBasisLog.create!(
-            generating_transaction: t,
+            transaction_id: t.id,
             cost_basis: latest.cost_basis - t_cost_basis,
             total_amount: latest.total_amount - t.from_amount,
             asset: t.from_asset,
@@ -25,14 +29,14 @@ module WalletBalanceService::CostBasisCalculator
         # Add to purchased asset's cost basis
         latest = latest_asset_log(t.from_asset)
         CostBasisLog.create!(
-          generating_transaction: t,
-          cost_basis: latest.cost_basis + t_cost_basis,
-          total_amount: latest.total_amount + t.to_amount,
+          transaction_id: t.id,
+          cost_basis: (latest&.cost_basis || 0) + t_cost_basis,
+          total_amount: (latest&.total_amount || 0) + t.to_amount,
           asset: t.to_asset,
           timestamp: t.timestamp
         )
 
-        t.update(from_cost_basis: t_cost_basis, fee_cost_basis: t_cost_basis)
+        t.update(from_cost_basis: t_cost_basis, to_cost_basis: t_cost_basis)
       end
     end
   end
@@ -41,12 +45,10 @@ module WalletBalanceService::CostBasisCalculator
 
   def get_cost(amount, asset)
     if FIAT_CURRENCIES.include?(asset)
-      return asset == 'USD' ? amount : covert_to_usd(amount, asset)
+      return %w[USD USDT] ? amount : covert_to_usd(amount, asset)
     end
 
-    cost_basis = latest_asset_log(asset)
-
-    cost_basis.unit_cost * amount
+    latest_asset_log(asset).unit_cost * amount
   end
 
   def covert_to_usd(amount, currency)
@@ -55,7 +57,7 @@ module WalletBalanceService::CostBasisCalculator
   end
 
   def latest_asset_log(asset)
-    user.binance_wallet.cost_basis_logs
+    @user.binance_wallet.cost_basis_logs
       .where(asset: asset)
       .order(timestamp: :desc)
       .first

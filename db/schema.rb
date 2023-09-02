@@ -23,8 +23,8 @@ ActiveRecord::Schema[7.0].define(version: 2025_01_25_212947) do
     t.datetime "timestamp"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["asset"], name: "index_cost_basis_logs_on_asset", unique: true
-    t.index ["timestamp"], name: "index_cost_basis_logs_on_timestamp", unique: true
+    t.index ["asset"], name: "index_cost_basis_logs_on_asset"
+    t.index ["timestamp"], name: "index_cost_basis_logs_on_timestamp"
     t.index ["transaction_id"], name: "index_cost_basis_logs_on_transaction_id"
   end
 
