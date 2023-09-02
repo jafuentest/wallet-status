@@ -5,8 +5,14 @@ module WalletBalanceService::CostBasisCalculator
     scope.each do |t|
       break if order_type == 'spot_trade'
 
-      operation_cost = get_cost(t.from_amount, t.from_asset)
-      # Update cost basis
+      current_cost_basis = get_cost(t.from_amount, t.from_asset)
+      raise RuntimeError.new('Missing cost basis of origin asset') if current_cost_basis
+
+      # update from_cost
+      # update to_cost
+
+      CostBasisLog.new() unless just_created
+
     end
   end
 
@@ -14,12 +20,15 @@ module WalletBalanceService::CostBasisCalculator
 
   def get_cost(amount, asset)
     if FIAT_CURRENCIES.include?(asset)
-      return amount if asset == 'USD'
-
-      covert_to_usd(amount, asset)
-    else
-      get_current_cost_basis(amount, asset)
+      return asset == 'USD' ? amount : covert_to_usd(amount, asset)
     end
+
+    cost_basis = user.binance_wallet.cost_basis_logs
+      .where(asset: asset)
+      .order(timestamp: :desc)
+      .first
+
+    cost_basis.unit_cost * amount
   end
 
   def covert_to_usd(amount, currency)
