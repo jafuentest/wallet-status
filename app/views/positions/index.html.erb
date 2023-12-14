@@ -14,8 +14,10 @@
   </thead>
   <tbody>
     <% portfolio_size = @positions.sum { |e| e[:amount] * e[:price] } %>
+    <% total = 0 %>
     <% @positions.each do |pos| %>
-      <tr>
+      <% total += pos[:value] %>
+      <tr class="font">
         <td><%= pos[:symbol] %></td>
         <td><%= pos[:amount] %></td>
         <td><%= pos[:price] %></td>
@@ -23,5 +25,10 @@
         <td><%= (pos[:value] / portfolio_size * 100).round(2) %></td>
       </tr>
     <% end %>
+    <tr class="fw-bold">
+      <td colspan="2">Total</td>
+      <td colspan="2"><%= number_with_delimiter(total.round(2)) %></td>
+      <td>100%</td>
+    </tr>
   </tbody>
 </table>
