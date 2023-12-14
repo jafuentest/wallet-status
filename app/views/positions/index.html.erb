@@ -38,35 +38,24 @@
 
 <script type="text/javascript">
   function copyToClipboard(e) {
-    var tableBody = document.createElement('tbody')
-    var tableToCopy = document.createElement('table')
-    tableToCopy.appendChild(tableBody)
+    var textToCopy = []
 
     var rows = document.getElementById("table-positions")
       .getElementsByTagName("tbody")[0]
       .getElementsByTagName("tr")
 
     for (var row of rows) {
+      // Last row (totals) has colspan="2", we don't want to copy this row
       if (row.children[0].colSpan > 1) continue
-      var rowToCopy = document.createElement('tr')
 
-      Array.from(row.children).slice(0, 3).forEach(function (cell) {
-        var newCell = rowToCopy.insertCell()
-        newCell.innerHTML = cell.innerHTML
-      })
-
-      tableBody.appendChild(rowToCopy)
+      childrenToCopy = Array.from(row.children)
+        .slice(0, 3)
+        .map(function(e) { return e.innerText })
+      textToCopy.push(childrenToCopy.join("\t"))
     }
 
-    // Create a new temporary div to hold the table
-    var tempDiv = document.createElement('div')
-    tempDiv.appendChild(tableToCopy.cloneNode(true))
-
-    // Copy the HTML content of the temporary div to the clipboard
-    navigator.clipboard.writeText(tempDiv.innerHTML)
-      .then(function () {
-        console.log('Table copied to clipboard successfully!')
-      })
+    // Use the clipboard API with a custom data transfer object
+    navigator.clipboard.writeText(textToCopy.join("\n"))
       .catch(function (err) {
         console.error('Unable to copy table to clipboard', err)
       })
