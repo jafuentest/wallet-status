@@ -46,18 +46,30 @@
       .getElementsByTagName("tbody")[0]
       .getElementsByTagName("tr")
 
-    for (row of rows) {
+    for (var row of rows) {
       if (row.children[0].colSpan > 1) continue
       var rowToCopy = document.createElement('tr')
 
-      Array.from(row.children).slice(0,3).forEach(function (e) {
-        rowToCopy.appendChild(e.cloneNode(true))
+      Array.from(row.children).slice(0, 3).forEach(function (cell) {
+        var newCell = rowToCopy.insertCell()
+        newCell.innerHTML = cell.innerHTML
       })
 
       tableBody.appendChild(rowToCopy)
     }
 
-    navigator.clipboard.writeText(tableToCopy.innerHTML)
+    // Create a new temporary div to hold the table
+    var tempDiv = document.createElement('div')
+    tempDiv.appendChild(tableToCopy.cloneNode(true))
+
+    // Copy the HTML content of the temporary div to the clipboard
+    navigator.clipboard.writeText(tempDiv.innerHTML)
+      .then(function () {
+        console.log('Table copied to clipboard successfully!')
+      })
+      .catch(function (err) {
+        console.error('Unable to copy table to clipboard', err)
+      })
   }
 
   var buttons = document.getElementsByClassName("btn-copy-table")
