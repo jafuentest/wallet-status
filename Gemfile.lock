@@ -196,7 +196,7 @@ GEM
       net-protocol
     net-ssh (7.0.1)
     newrelic_rpm (8.9.0)
-    nio4r (2.5.9)
+    nio4r (2.7.0)
     nokogiri (1.15.4)
       mini_portile2 (~> 2.8.2)
       racc (~> 1.4)
@@ -205,7 +205,7 @@ GEM
     parser (3.1.2.0)
       ast (~> 2.4.1)
     pg (1.2.3)
-    puma (5.6.7)
+    puma (5.6.8)
       nio4r (~> 2.0)
     racc (1.7.1)
     rack (2.2.8)
