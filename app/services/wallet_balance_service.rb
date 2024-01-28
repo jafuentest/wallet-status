@@ -26,9 +26,19 @@ class WalletBalanceService
   end
 
   def flexible_wallet
-    @flexible_wallet ||= client.simple_earn_flexible_position(recvWindow: 60_000)[:rows]
-      .select { |e| e[:totalAmount].to_f.positive? }
-      .each { |e| e[:totalAmount] = e[:totalAmount].to_f }
+    return @flexible_wallet if defined? @flexible_wallet
+
+    @flexible_wallet = client.simple_earn_flexible_position(recvWindow: 60_000)[:rows]
+      .each { |e| e[:amount] = e[:totalAmount].to_f }
+      .map { |e| e.slice(:asset, :amount) }
+  end
+
+  def locked_wallet
+    return @locked_wallet if defined? @locked_wallet
+
+    @locked_wallet = client.simple_earn_locked_position(recvWindow: 60_000)[:rows]
+      .each { |e| e[:amount] = e[:amount].to_f }
+      .map { |e| e.slice(:asset, :amount) }
   end
 
   def spot_wallet
@@ -74,7 +84,7 @@ class WalletBalanceService
 
   def mix_wallets
     flexible_wallet.reduce(spot_wallet.clone) do |spot, e_postion|
-      amount = e_postion[:totalAmount].to_f
+      amount = e_postion[:amount].to_f
       s_position = spot.find { |e| e[:asset] == e_postion[:asset] }
 
       if s_position.nil?
