@@ -8,7 +8,7 @@ class PositionsController < ApplicationController
 
   def update_wallet
     b = WalletBalanceService.new(current_user)
-    b.persist_postitions
+    b.persist_positions
     redirect_to positions_path
   end
 end

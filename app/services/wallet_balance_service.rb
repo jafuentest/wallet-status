@@ -14,27 +14,43 @@ class WalletBalanceService
   end
 
   def mixed_wallet
-    @mixed_wallet ||= mix_wallets
+    return @mixed_wallet if defined? @mixed_wallet
+
+    @mixed_wallet = mix_wallets
   end
 
-  def persist_postitions
-    mixed_wallet.each do |e|
-      pos = @wallet.positions.find_or_initialize_by(symbol: e[:asset], sub_wallet: 'spot')
-      pos.amount = e[:free]
-      pos.save!
+  def persist_positions
+    Parallel.map(%w[spot flexible locked]) do |wallet|
+      send(:"#{wallet}_wallet").each do |e|
+        pos = @wallet.positions.find_or_initialize_by(symbol: e[:asset], sub_wallet: wallet)
+        pos.amount = e[:amount]
+        pos.save!
+      end
     end
   end
 
   def flexible_wallet
-    @flexible_wallet ||= client.simple_earn_flexible_position(recvWindow: 60_000)[:rows]
-      .select { |e| e[:totalAmount].to_f.positive? }
-      .each { |e| e[:totalAmount] = e[:totalAmount].to_f }
+    return @flexible_wallet if defined? @flexible_wallet
+
+    @flexible_wallet = client.simple_earn_flexible_position(recvWindow: 60_000)[:rows]
+      .each { |e| e[:amount] = e[:totalAmount].to_f }
+      .map { |e| e.slice(:asset, :amount) }
+  end
+
+  def locked_wallet
+    return @locked_wallet if defined? @locked_wallet
+
+    @locked_wallet = client.simple_earn_locked_position(recvWindow: 60_000)[:rows]
+      .each { |e| e[:amount] = e[:amount].to_f }
+      .map { |e| e.slice(:asset, :amount) }
   end
 
   def spot_wallet
-    @spot_wallet ||= client.account(recvWindow: 60_000)[:balances]
+    return @spot_wallet if defined? @spot_wallet
+
+    @spot_wallet = client.account(recvWindow: 60_000)[:balances]
       .select { |e| normal_spot_balance(e) }
-      .each { |e| e[:free] = e[:free].to_f }
+      .each { |e| e[:amount] = e[:free].to_f }
   end
 
   def usd_balances
@@ -74,7 +90,7 @@ class WalletBalanceService
 
   def mix_wallets
     flexible_wallet.reduce(spot_wallet.clone) do |spot, e_postion|
-      amount = e_postion[:totalAmount].to_f
+      amount = e_postion[:amount].to_f
       s_position = spot.find { |e| e[:asset] == e_postion[:asset] }
 
       if s_position.nil?
