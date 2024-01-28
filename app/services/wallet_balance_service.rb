@@ -14,7 +14,9 @@ class WalletBalanceService
   end
 
   def mixed_wallet
-    @mixed_wallet ||= mix_wallets
+    return @mixed_wallet if defined? @mixed_wallet
+
+    @mixed_wallet = mix_wallets
   end
 
   def persist_postitions
@@ -42,7 +44,9 @@ class WalletBalanceService
   end
 
   def spot_wallet
-    @spot_wallet ||= client.account(recvWindow: 60_000)[:balances]
+    return @spot_wallet if defined? @spot_wallet
+
+    @spot_wallet = client.account(recvWindow: 60_000)[:balances]
       .select { |e| normal_spot_balance(e) }
       .each { |e| e[:free] = e[:free].to_f }
   end
