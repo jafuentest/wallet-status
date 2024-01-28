@@ -20,10 +20,12 @@ class WalletBalanceService
   end
 
   def persist_postitions
-    mixed_wallet.each do |e|
-      pos = @wallet.positions.find_or_initialize_by(symbol: e[:asset], sub_wallet: 'spot')
-      pos.amount = e[:free]
-      pos.save!
+    %w[spot flexible locked].each do |wallet|
+      send(:"#{wallet}_wallet").each do |e|
+        pos = @wallet.positions.find_or_initialize_by(symbol: e[:asset], sub_wallet: wallet)
+        pos.amount = e[:amount]
+        pos.save!
+      end
     end
   end
 
@@ -48,7 +50,7 @@ class WalletBalanceService
 
     @spot_wallet = client.account(recvWindow: 60_000)[:balances]
       .select { |e| normal_spot_balance(e) }
-      .each { |e| e[:free] = e[:free].to_f }
+      .each { |e| e[:amount] = e[:free].to_f }
   end
 
   def usd_balances
