@@ -4,5 +4,8 @@
 
 import { application } from "./application"
 
+import PositionsController from "./positions_controller.js"
 import StakingController from "./staking_controller.js"
+
+application.register("positions", PositionsController)
 application.register("staking", StakingController)

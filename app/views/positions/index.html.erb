@@ -1,7 +1,7 @@
 <h1>Positions</h1>
 
 <%= button_to 'Update positions', update_wallet_positions_path, class: 'btn btn-primary float-end' %>
-<button class="btn btn-primary btn-copy-table float-end">
+<button class="btn btn-primary btn-copy-table float-end" data-controller="positions" data-action="click->positions#copyToClipboard">
   Copy to clipboard
 </button>
 
@@ -35,33 +35,3 @@
     </tr>
   </tbody>
 </table>
-
-<script type="text/javascript">
-  function copyToClipboard(e) {
-    var textToCopy = []
-
-    var rows = document.getElementById("table-positions")
-      .getElementsByTagName("tbody")[0]
-      .getElementsByTagName("tr")
-
-    for (var row of rows) {
-      // Last row (totals) has colspan="2", we don't want to copy this row
-      if (row.children[0].colSpan > 1) continue
-
-      childrenToCopy = Array.from(row.children)
-        .slice(0, 3)
-        .map(function(e) { return e.innerText })
-      textToCopy.push(childrenToCopy.join("\t"))
-    }
-
-    // Use the clipboard API with a custom data transfer object
-    navigator.clipboard.writeText(textToCopy.join("\n"))
-      .catch(function (err) {
-        console.error('Unable to copy table to clipboard', err)
-      })
-  }
-
-  var buttons = document.getElementsByClassName("btn-copy-table")
-  for (button of buttons)
-    button.onclick = copyToClipboard
-</script>
