@@ -25,7 +25,7 @@ gem 'pg', '~> 1.2.3'
 # gem 'bcrypt', '~> 3.1.7'
 
 # Binance
-gem 'binance-connector-ruby', github: 'jafuentest/binance-connector-ruby', branch: 'fix-savings-account-endpoint'
+gem 'binance-connector-ruby', github: 'jafuentest/binance-connector-ruby'
 # User registrations
 gem 'devise'
 # Background jobs
