@@ -19,7 +19,7 @@ class WalletBalanceService
     @mixed_wallet = mix_wallets
   end
 
-  def persist_postitions
+  def persist_positions
     %w[spot flexible locked].each do |wallet|
       send(:"#{wallet}_wallet").each do |e|
         pos = @wallet.positions.find_or_initialize_by(symbol: e[:asset], sub_wallet: wallet)
