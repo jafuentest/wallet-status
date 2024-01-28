@@ -20,7 +20,7 @@ class WalletBalanceService
   end
 
   def persist_positions
-    %w[spot flexible locked].each do |wallet|
+    Parallel.map(%w[spot flexible locked]) do |wallet|
       send(:"#{wallet}_wallet").each do |e|
         pos = @wallet.positions.find_or_initialize_by(symbol: e[:asset], sub_wallet: wallet)
         pos.amount = e[:amount]
