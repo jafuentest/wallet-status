@@ -1,9 +1,10 @@
 <h1>Positions</h1>
 
 <%= button_to 'Update positions', update_wallet_positions_path, class: 'btn btn-primary float-end' %>
-<button class="btn btn-primary btn-copy-table float-end" data-controller="positions" data-action="click->positions#copyToClipboard">
-  Copy to clipboard
-</button>
+<%= button_tag '',
+  class: "btn btn-primary btn-copy-table float-end bi-clipboard me-2",
+  data: { controller: 'positions', action: 'click->positions#copyToClipboard' }
+%>
 
 <table id="table-positions" class="table table-striped">
   <thead>
