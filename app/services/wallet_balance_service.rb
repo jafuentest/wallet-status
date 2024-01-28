@@ -25,7 +25,7 @@ class WalletBalanceService
     end
   end
 
-  def savings_wallet
+  def flexible_wallet
     @flexible_wallet ||= client.simple_earn_flexible_position(recvWindow: 60_000)[:rows]
       .select { |e| e[:totalAmount].to_f.positive? }
       .each { |e| e[:totalAmount] = e[:totalAmount].to_f }
@@ -73,7 +73,7 @@ class WalletBalanceService
   end
 
   def mix_wallets
-    savings_wallet.reduce(spot_wallet.clone) do |spot, e_postion|
+    flexible_wallet.reduce(spot_wallet.clone) do |spot, e_postion|
       amount = e_postion[:totalAmount].to_f
       s_position = spot.find { |e| e[:asset] == e_postion[:asset] }
 
