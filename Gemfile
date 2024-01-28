@@ -48,9 +48,6 @@ gem 'turbo-rails'
 # Hotwire's modest JavaScript framework [https://stimulus.hotwired.dev]
 gem 'stimulus-rails'
 
-# Use Sass to process CSS
-# gem 'sassc-rails'
-
 # Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
 # gem 'image_processing', '~> 1.2'
 
@@ -74,17 +71,21 @@ group :development do
   # gem 'web-console'
 
   # Add speed badges [https://github.com/MiniProfiler/rack-mini-profiler]
-  # gem 'rack-mini-profiler'
+  gem 'rack-mini-profiler'
 
   # Speed up commands on slow machines / big apps [https://github.com/rails/spring]
   # gem 'spring'
 
+  # Deployment support
   gem 'capistrano'
   gem 'capistrano3-puma'
   gem 'capistrano-bundler'
   gem 'capistrano-delayed-job'
   gem 'capistrano-rails'
   gem 'capistrano-rvm'
+
+  # Add database schema to models
+  gem 'annotate', '~> 3.2'
 end
 
 group :test do
