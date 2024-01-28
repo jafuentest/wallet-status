@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/jafuentest/binance-connector-ruby.git
-  revision: b41b238ac2ee16c928155998b681476370db31cb
+  revision: affddd91927e7d1eae0e67c8eee10235159a4a32
   branch: fix-savings-account-endpoint
   specs:
     binance-connector-ruby (1.4.0)
