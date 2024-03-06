@@ -27,6 +27,8 @@ class WalletBalanceService
         pos.save!
       end
     end
+
+    @wallet.positions.where(amount: 0).destroy_all
   end
 
   def flexible_wallet
