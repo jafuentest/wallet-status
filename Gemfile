@@ -15,7 +15,7 @@ gem 'bootsnap', require: false
 gem 'newrelic_rpm'
 
 # Use postgresql as the database for Active Record
-gem 'pg', '~> 1.2.3'
+gem 'pg', '~> 1.2'
 
 # Use Redis adapter to run Action Cable in production
 # gem 'redis', '~> 4.0'
