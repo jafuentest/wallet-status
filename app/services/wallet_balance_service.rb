@@ -21,10 +21,17 @@ class WalletBalanceService
 
   def persist_positions
     Parallel.map(%w[spot flexible locked]) do |wallet|
-      send(:"#{wallet}_wallet").each do |e|
+      positions = send("#{wallet}_wallet")
+      positions.each do |e|
         pos = @wallet.positions.find_or_initialize_by(symbol: e[:asset], sub_wallet: wallet)
         pos.amount = e[:amount]
         pos.save!
+      end
+
+      unless wallet == 'spot'
+        @wallet.positions.send(wallet)
+          .where.not(symbol: positions.pluck(:asset))
+          .delete_all
       end
     end
 
