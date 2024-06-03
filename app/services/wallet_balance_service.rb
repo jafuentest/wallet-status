@@ -51,7 +51,7 @@ class WalletBalanceService
     return @spot_wallet if defined? @spot_wallet
 
     @spot_wallet = client.account(recvWindow: 60_000)[:balances]
-      .select { |e| normal_spot_balance(e) }
+      .select { |e| normal_spot_balance?(e) }
       .each { |e| e[:amount] = e[:free].to_f }
   end
 
@@ -104,7 +104,7 @@ class WalletBalanceService
     end
   end
 
-  def normal_spot_balance(position)
+  def normal_spot_balance?(position)
     return false unless position[:asset].exclude?('LD')
 
     position[:free].to_f.positive? ||
