@@ -1,5 +1,5 @@
 # config valid for current version and patch releases of Capistrano
-lock '~> 3.17.0'
+lock '~> 3.18.1'
 
 set :application, 'wallet_status'
 set :repo_url, 'git@github.com:jafuentest/wallet-status.git'
