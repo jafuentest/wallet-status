@@ -28,30 +28,33 @@ class WalletBalanceService
         pos.save!
       end
 
-      unless wallet == 'spot'
-        @wallet.positions.send(wallet)
-          .where.not(symbol: positions.pluck(:asset))
-          .delete_all
-      end
+      next if wallet == 'spot'
+
+      @wallet.positions.send(wallet)
+        .where.not(symbol: positions.pluck(:asset))
+        .delete_all
     end
 
     @wallet.positions.where(amount: 0).destroy_all
+  end
+
+  def savings_wallet(type = 'flexible')
+    wallet, amount_key = type == 'flexible' ? ['flexible_wallet', totalAmount] : ['locked_wallet', :amount]
+
+    wallet.each { |e| e[:amount] = e[amount_key].to_f }
+      .map { |e| e.slice(:asset, :amount) }
   end
 
   def flexible_wallet
     return @flexible_wallet if defined? @flexible_wallet
 
     @flexible_wallet = client.simple_earn_flexible_position(recvWindow: 60_000)[:rows]
-      .each { |e| e[:amount] = e[:totalAmount].to_f }
-      .map { |e| e.slice(:asset, :amount) }
   end
 
   def locked_wallet
     return @locked_wallet if defined? @locked_wallet
 
     @locked_wallet = client.simple_earn_locked_position(recvWindow: 60_000)[:rows]
-      .each { |e| e[:amount] = e[:amount].to_f }
-      .map { |e| e.slice(:asset, :amount) }
   end
 
   def spot_wallet
