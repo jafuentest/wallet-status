@@ -42,14 +42,14 @@ class WalletBalanceService
     return @flexible_wallet if defined? @flexible_wallet
 
     @flexible_wallet = client.simple_earn_flexible_position(recvWindow: 60_000)[:rows]
-    savings_wallet(@flexible_wallet, 'flexible')
+    formatted_wallet_data(@flexible_wallet, 'flexible')
   end
 
   def locked_wallet
     return @locked_wallet if defined? @locked_wallet
 
     @locked_wallet = client.simple_earn_locked_position(recvWindow: 60_000)[:rows]
-    savings_wallet(@locked_wallet, 'locked')
+    formatted_wallet_data(@locked_wallet, 'locked')
   end
 
   def spot_wallet
@@ -116,8 +116,8 @@ class WalletBalanceService
       @wallet.positions.find_by(symbol: position[:asset])&.amount&.positive?
   end
 
-  def savings_wallet(wallet, type = 'flexible')
-    wallet, amount_key = type == 'flexible' ? ['flexible_wallet', :totalAmount] : ['locked_wallet', :amount]
+  def formatted_wallet_data(wallet, type = 'flexible')
+    amount_key = type == 'flexible' ? :totalAmount : :amount
 
     wallet.each { |e| e[:amount] = e[amount_key].to_f }
       .map { |e| e.slice(:asset, :amount) }
