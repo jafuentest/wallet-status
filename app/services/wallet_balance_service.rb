@@ -117,7 +117,7 @@ class WalletBalanceService
   end
 
   def savings_wallet(wallet, type = 'flexible')
-    wallet, amount_key = type == 'flexible' ? ['flexible_wallet', totalAmount] : ['locked_wallet', :amount]
+    wallet, amount_key = type == 'flexible' ? ['flexible_wallet', :totalAmount] : ['locked_wallet', :amount]
 
     wallet.each { |e| e[:amount] = e[amount_key].to_f }
       .map { |e| e.slice(:asset, :amount) }
