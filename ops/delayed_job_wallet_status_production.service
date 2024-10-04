@@ -7,7 +7,7 @@ Type=simple
 User=ec2-user
 Environment="RAILS_ENV=production"
 WorkingDirectory=/home/ec2-user/wallet_status/current
-ExecStart=/bin/bash -lc 'source /home/ec2-user/.rvm/scripts/rvm && rvm $(cat /home/ec2-user/wallet_status/current/.ruby-version) do bundle exec rails jobs:work
+ExecStart=/bin/bash -lc 'source /home/ec2-user/.rvm/scripts/rvm && rvm $(cat /home/ec2-user/wallet_status/current/.ruby-version) do bundle exec rails jobs:work'
 ExecReload=/bin/kill -TSTP $MAINPID
 StandardOutput=journal
 StandardError=journal
