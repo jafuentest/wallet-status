@@ -51,7 +51,15 @@ gem 'stimulus-rails'
 # Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
 # gem 'image_processing', '~> 1.2'
 
+# Make parallel requests
 gem 'parallel', '~> 1.22'
+
+# Just to silence ruby 3.5 warnings, may remove some in the future
+gem 'bigdecimal'
+gem 'fiddle'
+gem 'logger'
+gem 'ostruct'
+gem 'rdoc'
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
