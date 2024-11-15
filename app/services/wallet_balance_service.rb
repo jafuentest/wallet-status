@@ -62,14 +62,14 @@ class WalletBalanceService
   def flexible_wallet
     return @flexible_wallet if defined? @flexible_wallet
 
-    @flexible_wallet = client.simple_earn_flexible_position(recvWindow: 60_000)[:rows]
+    @flexible_wallet = client.simple_earn_flexible_position(recvWindow: 60_000, size: 100)[:rows]
     formatted_wallet_data(@flexible_wallet, 'flexible')
   end
 
   def locked_wallet
     return @locked_wallet if defined? @locked_wallet
 
-    @locked_wallet = client.simple_earn_locked_position(recvWindow: 60_000)[:rows]
+    @locked_wallet = client.simple_earn_locked_position(recvWindow: 60_000, size: 100)[:rows]
     formatted_wallet_data(@locked_wallet, 'locked')
   end
 
