@@ -27,7 +27,7 @@ class WalletBalanceService
 
   def persist_positions
     Parallel.map(POSITION_PERSIST_HASH) do |wallet, method_name|
-      method(method_name).each do |e|
+      method(method_name).call.each do |e|
         pos = @wallet.positions.find_or_initialize_by(symbol: e[:asset], sub_wallet: wallet)
         pos.amount = e[:amount]
         pos.save!
