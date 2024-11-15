@@ -25,13 +25,10 @@ class WalletBalanceService
     @mixed_wallet = mix_wallets
   end
 
-  def persist_positions
+  def update_positions
     Parallel.map(POSITION_PERSIST_HASH) do |wallet, method_name|
-      method(method_name).call.each do |e|
-        pos = @wallet.positions.find_or_initialize_by(symbol: e[:asset], sub_wallet: wallet)
-        pos.amount = e[:amount]
-        pos.save!
-      end
+      positions = method(method_name).call
+      positions.each { |p| persist_position(wallet, p) }
 
       delete_missing_positions(wallet, positions.pluck(:asset)) unless wallet == 'spot'
     end
@@ -58,6 +55,12 @@ class WalletBalanceService
   end
 
   private
+
+  def persist_position(wallet, position)
+    pos = @wallet.positions.find_or_initialize_by(symbol: position[:asset], sub_wallet: wallet)
+    pos.amount = position[:amount]
+    pos.save!
+  end
 
   def flexible_wallet
     return @flexible_wallet if defined? @flexible_wallet

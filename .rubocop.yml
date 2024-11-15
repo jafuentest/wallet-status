@@ -30,6 +30,11 @@ Layout/MultilineMethodCallIndentation:
 Layout/MultilineOperationIndentation:
   EnforcedStyle: indented
 
+Metrics/AbcSize:
+  CountRepeatedAttributes: false
+  Exclude:
+    - db/migrate/*
+
 Metrics/BlockLength:
   Exclude:
     - config/routes.rb
@@ -39,10 +44,8 @@ Metrics/BlockLength:
     - included  # Concerns
     - setup     # Because of devise
 
-Metrics/AbcSize:
-  CountRepeatedAttributes: false
-  Exclude:
-    - db/migrate/*
+Metrics/ClassLength:
+  CountAsOne: ['array', 'hash', 'heredoc']
 
 Metrics/MethodLength:
   Exclude:
