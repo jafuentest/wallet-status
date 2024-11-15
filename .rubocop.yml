@@ -34,7 +34,7 @@ Metrics/BlockLength:
   Exclude:
     - config/routes.rb
     - db/*
-  IgnoredMethods:
+  AllowedMethods:
     - configure
     - included  # Concerns
     - setup     # Because of devise
@@ -68,3 +68,6 @@ Style/FrozenStringLiteralComment:
 
 Style/RegexpLiteral:
   EnforcedStyle: mixed
+
+# Style/TrailingCommaInHashLiteral:
+#   EnforcedStyleForMultiline: comma
