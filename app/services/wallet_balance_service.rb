@@ -5,6 +5,12 @@ class WalletBalanceService
   include WalletBalanceService::Margin
   include WalletBalanceService::SpotTrades
 
+  POSITION_PERSIST_HASH = {
+    'spot' => :spot_wallet,
+    'flexible' => :flexible_wallet,
+    'locked' => :locked_wallet
+  }.freeze
+
   attr_accessor :client
 
   def initialize(user)
@@ -20,23 +26,38 @@ class WalletBalanceService
   end
 
   def persist_positions
-    Parallel.map(%w[spot flexible locked]) do |wallet|
-      positions = send("#{wallet}_wallet")
-      positions.each do |e|
+    Parallel.map(POSITION_PERSIST_HASH) do |wallet, method_name|
+      method(method_name).each do |e|
         pos = @wallet.positions.find_or_initialize_by(symbol: e[:asset], sub_wallet: wallet)
         pos.amount = e[:amount]
         pos.save!
       end
 
-      next if wallet == 'spot'
-
-      @wallet.positions.send(wallet)
-        .where.not(symbol: positions.pluck(:asset))
-        .delete_all
+      delete_missing_positions(wallet, positions.pluck(:asset)) unless wallet == 'spot'
     end
 
     @wallet.positions.where(amount: 0).destroy_all
   end
+
+  def usd_balances
+    @user.positions.select('symbol, SUM(amount) AS amount').group(:symbol).map do |pos|
+      price_hash = tickers.find { |e| e[:symbol] == price(pos) }
+      price = price_hash ? price_hash[:price].to_f : 1.0
+      pos.attributes.merge(price: price, value: (pos.amount * price).round(2)).symbolize_keys
+    end
+  end
+
+  def updated_symbols
+    symbols = %w[usdt busd usdc btc eth bnb others].reduce([]) do |syms, parent_symbol|
+      slices = YAML.load_file Rails.root.join('config', 'trading_pairs', "#{parent_symbol}.yml")
+      slices = slices.each_pair.reduce({}) { |h, (_k, v)| h.merge(v) } if parent_symbol == 'others'
+      syms << slices.map(&:first)
+    end
+
+    symbols.flatten
+  end
+
+  private
 
   def flexible_wallet
     return @flexible_wallet if defined? @flexible_wallet
@@ -59,26 +80,6 @@ class WalletBalanceService
       .select { |e| normal_spot_balance?(e) }
       .each { |e| e[:amount] = e[:free].to_f }
   end
-
-  def usd_balances
-    @user.positions.select('symbol, SUM(amount) AS amount').group(:symbol).map do |pos|
-      price_hash = tickers.find { |e| e[:symbol] == price(pos) }
-      price = price_hash ? price_hash[:price].to_f : 1.0
-      pos.attributes.merge(price: price, value: (pos.amount * price).round(2)).symbolize_keys
-    end
-  end
-
-  def updated_symbols
-    symbols = %w[usdt busd usdc btc eth bnb others].reduce([]) do |syms, parent_symbol|
-      slices = YAML.load_file Rails.root.join('config', 'trading_pairs', "#{parent_symbol}.yml")
-      slices = slices.each_pair.reduce({}) { |h, (_k, v)| h.merge(v) } if parent_symbol == 'others'
-      syms << slices.map(&:first)
-    end
-
-    symbols.flatten
-  end
-
-  private
 
   def price(pos)
     traded_against = pos[:symbol] == 'LUNC' ? 'BUSD' : 'USDT'
@@ -121,5 +122,11 @@ class WalletBalanceService
 
     wallet.each { |e| e[:amount] = e[amount_key].to_f }
       .map { |e| e.slice(:asset, :amount) }
+  end
+
+  def delete_missing_positions(wallet, existing_positions)
+    @wallet.positions.send(wallet)
+      .where.not(symbol: existing_positions.pluck(:asset))
+      .delete_all
   end
 end
