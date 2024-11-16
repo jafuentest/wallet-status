@@ -21,7 +21,9 @@ class WalletBalanceService
   end
 
   def update_positions
+    Rails.logger.info 'WalletBalanceService#update_positions'
     Parallel.map(POSITION_PERSIST_HASH) do |wallet, method_name|
+      Rails.logger.info "WalletBalanceService#update_positions #{wallet}"
       positions = method(method_name).call
       positions.each { |p| persist_position(wallet, p) }
 
@@ -30,6 +32,7 @@ class WalletBalanceService
 
     @wallet.positions.where(amount: 0).delete_all
   end
+  add_method_tracer :update_positions, 'Custom/WalletBalanceService#update_positions'
 
   def usd_balances
     @user.positions.select('symbol, SUM(amount) AS amount').group(:symbol).map do |pos|
@@ -38,6 +41,7 @@ class WalletBalanceService
       pos.attributes.merge(price: price, value: (pos.amount * price).round(2)).symbolize_keys
     end
   end
+  add_method_tracer :usd_balances, 'Custom/WalletBalanceService#usd_balances'
 
   def updated_symbols
     symbols = %w[usdt busd usdc btc eth bnb others].reduce([]) do |syms, parent_symbol|
@@ -48,6 +52,7 @@ class WalletBalanceService
 
     symbols.flatten
   end
+  add_method_tracer :updated_symbols, 'Custom/WalletBalanceService#updated_symbols'
 
   private
 
@@ -57,6 +62,7 @@ class WalletBalanceService
     rows = client.flexible_product_position(recvWindow: 60_000, size: 100)[:rows]
     @flexible_wallet = formatted_wallet_data(rows, 'flexible')
   end
+  add_method_tracer :flexible_wallet, 'Custom/WalletBalanceService#flexible_wallet'
 
   def locked_wallet
     return @locked_wallet if defined? @locked_wallet
@@ -64,6 +70,7 @@ class WalletBalanceService
     rows = client.locked_product_position(recvWindow: 60_000, size: 100)[:rows]
     @locked_wallet = formatted_wallet_data(rows, 'locked')
   end
+  add_method_tracer :locked_wallet, 'Custom/WalletBalanceService#locked_wallet'
 
   def spot_wallet
     return @spot_wallet if defined? @spot_wallet
@@ -72,6 +79,7 @@ class WalletBalanceService
       .select { |e| normal_spot_balance?(e) }
       .each { |e| e[:amount] = e[:free].to_f }
   end
+  add_method_tracer :spot_wallet, 'Custom/WalletBalanceService#spot_wallet'
 
   def dual_investment_wallet
     return @dual_investment_wallet if defined? @dual_investment_wallet
@@ -95,6 +103,7 @@ class WalletBalanceService
       @tickers = client.ticker_price
     end
   end
+  add_method_tracer :tickers, 'Custom/WalletBalanceService#tickers'
 
   def empty_position(asset, amount)
     { asset: asset, free: amount, locked: 0.0 }
@@ -121,6 +130,7 @@ class WalletBalanceService
   end
 
   def persist_position(wallet, position)
+    Rails.logger.info "WalletBalanceService#persist_position #{wallet} #{position[:asset]}"
     pos = @wallet.positions.find_or_initialize_by(symbol: position[:asset], sub_wallet: wallet)
     pos.amount = position[:amount]
     pos.save! unless pos.new_record? && pos.amount.zero?
