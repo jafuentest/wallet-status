@@ -30,19 +30,22 @@ Layout/MultilineMethodCallIndentation:
 Layout/MultilineOperationIndentation:
   EnforcedStyle: indented
 
-Metrics/BlockLength:
-  Exclude:
-    - config/routes.rb
-    - db/*
-  IgnoredMethods:
-    - configure
-    - included  # Concerns
-    - setup     # Because of devise
-
 Metrics/AbcSize:
   CountRepeatedAttributes: false
   Exclude:
     - db/migrate/*
+
+Metrics/BlockLength:
+  Exclude:
+    - config/routes.rb
+    - db/*
+  AllowedMethods:
+    - configure
+    - included  # Concerns
+    - setup     # Because of devise
+
+Metrics/ClassLength:
+  CountAsOne: ['array', 'hash', 'heredoc']
 
 Metrics/MethodLength:
   Exclude:
@@ -68,3 +71,6 @@ Style/FrozenStringLiteralComment:
 
 Style/RegexpLiteral:
   EnforcedStyle: mixed
+
+# Style/TrailingCommaInHashLiteral:
+#   EnforcedStyleForMultiline: comma

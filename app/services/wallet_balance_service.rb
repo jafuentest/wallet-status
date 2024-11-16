@@ -5,6 +5,12 @@ class WalletBalanceService
   include WalletBalanceService::Margin
   include WalletBalanceService::SpotTrades
 
+  POSITION_PERSIST_HASH = {
+    'spot' => :spot_wallet,
+    'flexible' => :flexible_wallet,
+    'locked' => :locked_wallet
+  }.freeze
+
   attr_accessor :client
 
   def initialize(user)
@@ -13,46 +19,15 @@ class WalletBalanceService
     self.client = Binance::Spot.new(key: @wallet.api_key, secret: @wallet.api_secret)
   end
 
-  def mixed_wallet
-    return @mixed_wallet if defined? @mixed_wallet
+  def update_positions
+    Parallel.map(POSITION_PERSIST_HASH) do |wallet, method_name|
+      positions = method(method_name).call
+      positions.each { |p| persist_position(wallet, p) }
 
-    @mixed_wallet = mix_wallets
-  end
-
-  def persist_positions
-    Parallel.map(%w[spot flexible locked]) do |wallet|
-      send(:"#{wallet}_wallet").each do |e|
-        pos = @wallet.positions.find_or_initialize_by(symbol: e[:asset], sub_wallet: wallet)
-        pos.amount = e[:amount]
-        pos.save!
-      end
+      delete_missing_positions(wallet, positions.pluck(:asset)) unless wallet == 'spot'
     end
 
-    @wallet.positions.where(amount: 0).destroy_all
-  end
-
-  def flexible_wallet
-    return @flexible_wallet if defined? @flexible_wallet
-
-    @flexible_wallet = client.simple_earn_flexible_position(recvWindow: 60_000)[:rows]
-      .each { |e| e[:amount] = e[:totalAmount].to_f }
-      .map { |e| e.slice(:asset, :amount) }
-  end
-
-  def locked_wallet
-    return @locked_wallet if defined? @locked_wallet
-
-    @locked_wallet = client.simple_earn_locked_position(recvWindow: 60_000)[:rows]
-      .each { |e| e[:amount] = e[:amount].to_f }
-      .map { |e| e.slice(:asset, :amount) }
-  end
-
-  def spot_wallet
-    return @spot_wallet if defined? @spot_wallet
-
-    @spot_wallet = client.account(recvWindow: 60_000)[:balances]
-      .select { |e| normal_spot_balance(e) }
-      .each { |e| e[:amount] = e[:free].to_f }
+    @wallet.positions.where(amount: 0).delete_all
   end
 
   def usd_balances
@@ -75,6 +50,28 @@ class WalletBalanceService
 
   private
 
+  def flexible_wallet
+    return @flexible_wallet if defined? @flexible_wallet
+
+    @flexible_wallet = client.simple_earn_flexible_position(recvWindow: 60_000, size: 100)[:rows]
+    formatted_wallet_data(@flexible_wallet, 'flexible')
+  end
+
+  def locked_wallet
+    return @locked_wallet if defined? @locked_wallet
+
+    @locked_wallet = client.simple_earn_locked_position(recvWindow: 60_000, size: 100)[:rows]
+    formatted_wallet_data(@locked_wallet, 'locked')
+  end
+
+  def spot_wallet
+    return @spot_wallet if defined? @spot_wallet
+
+    @spot_wallet = client.account(recvWindow: 60_000)[:balances]
+      .select { |e| normal_spot_balance?(e) }
+      .each { |e| e[:amount] = e[:free].to_f }
+  end
+
   def price(pos)
     traded_against = pos[:symbol] == 'LUNC' ? 'BUSD' : 'USDT'
     "#{pos[:symbol]}#{traded_against}"
@@ -90,24 +87,35 @@ class WalletBalanceService
     { asset: asset, free: amount, locked: 0.0 }
   end
 
-  def mix_wallets
-    flexible_wallet.reduce(spot_wallet.clone) do |spot, e_postion|
-      amount = e_postion[:amount].to_f
-      s_position = spot.find { |e| e[:asset] == e_postion[:asset] }
-
-      if s_position.nil?
-        spot << empty_position(e_postion[:asset], amount)
-      else
-        s_position[:free] += amount
-        spot
-      end
-    end
-  end
-
-  def normal_spot_balance(position)
-    return false unless position[:asset].exclude?('LD')
+  def normal_spot_balance?(position)
+    return false if position[:asset].include?('LD')
 
     position[:free].to_f.positive? ||
-      @wallet.positions.find_by(symbol: position[:asset])&.amount&.positive?
+      spot_balances.find { |e| e.symbol == position[:asset] }&.amount&.positive?
+  end
+
+  def spot_balances
+    return @spot_balances if defined? @spot_balances
+
+    @spot_balances = @wallet.positions.spot.to_a
+  end
+
+  def formatted_wallet_data(wallet, type = 'flexible')
+    amount_key = type == 'flexible' ? :totalAmount : :amount
+
+    wallet.each { |e| e[:amount] = e[amount_key].to_f }
+      .map { |e| e.slice(:asset, :amount) }
+  end
+
+  def persist_position(wallet, position)
+    pos = @wallet.positions.find_or_initialize_by(symbol: position[:asset], sub_wallet: wallet)
+    pos.amount = position[:amount]
+    pos.save! unless pos.new_record? && pos.amount.zero?
+  end
+
+  def delete_missing_positions(wallet, symbols)
+    @wallet.positions.send(wallet)
+      .where.not(symbol: symbols)
+      .delete_all
   end
 end

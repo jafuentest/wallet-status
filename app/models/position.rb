@@ -16,6 +16,7 @@ class Position < ApplicationRecord
 
   scope :flexible, -> { where(sub_wallet: 'flexible') }
   scope :locked, -> { where(sub_wallet: 'locked') }
+  scope :spot, -> { where(sub_wallet: 'spot') }
   scope :staking, -> { where(sub_wallet: 'staking') }
 
   with_options(presence: true) do
