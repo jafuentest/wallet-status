@@ -33,7 +33,7 @@ class WalletBalanceService
       delete_missing_positions(wallet, positions.pluck(:asset)) unless wallet == 'spot'
     end
 
-    @wallet.positions.where(amount: 0).destroy_all
+    @wallet.positions.where(amount: 0).delete_all
   end
 
   def usd_balances
@@ -59,7 +59,7 @@ class WalletBalanceService
   def persist_position(wallet, position)
     pos = @wallet.positions.find_or_initialize_by(symbol: position[:asset], sub_wallet: wallet)
     pos.amount = position[:amount]
-    pos.save!
+    pos.save! unless pos.new_record? && pos.amount.zero?
   end
 
   def flexible_wallet
@@ -114,10 +114,16 @@ class WalletBalanceService
   end
 
   def normal_spot_balance?(position)
-    return false unless position[:asset].exclude?('LD')
+    return false if position[:asset].include?('LD')
 
     position[:free].to_f.positive? ||
-      @wallet.positions.find_by(symbol: position[:asset])&.amount&.positive?
+      spot_balances.find { |e| e.symbol == position[:asset] }&.amount&.positive?
+  end
+
+  def spot_balances
+    return @spot_balances if defined? @spot_balances
+
+    @spot_balances = @wallet.positions.spot.to_a
   end
 
   def formatted_wallet_data(wallet, type = 'flexible')
@@ -127,9 +133,9 @@ class WalletBalanceService
       .map { |e| e.slice(:asset, :amount) }
   end
 
-  def delete_missing_positions(wallet, existing_positions)
+  def delete_missing_positions(wallet, symbols)
     @wallet.positions.send(wallet)
-      .where.not(symbol: existing_positions.pluck(:asset))
+      .where.not(symbol: symbols)
       .delete_all
   end
 end
