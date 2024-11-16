@@ -61,7 +61,7 @@ class WalletBalanceService
   def locked_wallet
     return @locked_wallet if defined? @locked_wallet
 
-    rows = client.flexible_product_position(recvWindow: 60_000, size: 100)[:rows]
+    rows = client.locked_product_position(recvWindow: 60_000, size: 100)[:rows]
     @locked_wallet = formatted_wallet_data(rows, 'locked')
   end
 
