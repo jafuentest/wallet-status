@@ -19,12 +19,6 @@ class WalletBalanceService
     self.client = Binance::Spot.new(key: @wallet.api_key, secret: @wallet.api_secret)
   end
 
-  def mixed_wallet
-    return @mixed_wallet if defined? @mixed_wallet
-
-    @mixed_wallet = mix_wallets
-  end
-
   def update_positions
     Parallel.map(POSITION_PERSIST_HASH) do |wallet, method_name|
       positions = method(method_name).call
@@ -55,12 +49,6 @@ class WalletBalanceService
   end
 
   private
-
-  def persist_position(wallet, position)
-    pos = @wallet.positions.find_or_initialize_by(symbol: position[:asset], sub_wallet: wallet)
-    pos.amount = position[:amount]
-    pos.save! unless pos.new_record? && pos.amount.zero?
-  end
 
   def flexible_wallet
     return @flexible_wallet if defined? @flexible_wallet
@@ -99,20 +87,6 @@ class WalletBalanceService
     { asset: asset, free: amount, locked: 0.0 }
   end
 
-  def mix_wallets
-    flexible_wallet.reduce(spot_wallet.clone) do |spot, e_postion|
-      amount = e_postion[:amount].to_f
-      s_position = spot.find { |e| e[:asset] == e_postion[:asset] }
-
-      if s_position.nil?
-        spot << empty_position(e_postion[:asset], amount)
-      else
-        s_position[:free] += amount
-        spot
-      end
-    end
-  end
-
   def normal_spot_balance?(position)
     return false if position[:asset].include?('LD')
 
@@ -131,6 +105,12 @@ class WalletBalanceService
 
     wallet.each { |e| e[:amount] = e[amount_key].to_f }
       .map { |e| e.slice(:asset, :amount) }
+  end
+
+  def persist_position(wallet, position)
+    pos = @wallet.positions.find_or_initialize_by(symbol: position[:asset], sub_wallet: wallet)
+    pos.amount = position[:amount]
+    pos.save! unless pos.new_record? && pos.amount.zero?
   end
 
   def delete_missing_positions(wallet, symbols)
