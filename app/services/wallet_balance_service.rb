@@ -32,7 +32,6 @@ class WalletBalanceService
 
     @wallet.positions.where(amount: 0).delete_all
   end
-  add_method_tracer :update_positions, 'Custom/WalletBalanceService#update_positions'
 
   def usd_balances
     @user.positions.select('symbol, SUM(amount) AS amount').group(:symbol).map do |pos|
@@ -41,7 +40,6 @@ class WalletBalanceService
       pos.attributes.merge(price: price, value: (pos.amount * price).round(2)).symbolize_keys
     end
   end
-  add_method_tracer :usd_balances, 'Custom/WalletBalanceService#usd_balances'
 
   def updated_symbols
     symbols = %w[usdt busd usdc btc eth bnb others].reduce([]) do |syms, parent_symbol|
