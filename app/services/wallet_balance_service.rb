@@ -22,7 +22,8 @@ class WalletBalanceService
 
   def update_positions
     Rails.logger.info 'WalletBalanceService#update_positions'
-    Parallel.map(POSITION_PERSIST_HASH) do |wallet, method_name|
+    # Parallel.map(POSITION_PERSIST_HASH) do |wallet, method_name|
+    POSITION_PERSIST_HASH.map do |wallet, method_name|
       Rails.logger.info "WalletBalanceService#update_positions #{wallet}"
       positions = method(method_name).call
       positions.each { |p| persist_position(wallet, p) }
