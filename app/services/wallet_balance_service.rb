@@ -21,9 +21,7 @@ class WalletBalanceService
   end
 
   def update_positions
-    Rails.logger.info 'WalletBalanceService#update_positions'
     Parallel.map(POSITION_PERSIST_HASH, in_threads: POSITION_PERSIST_HASH.size) do |wallet, method_name|
-      Rails.logger.info "WalletBalanceService#update_positions #{wallet}"
       positions = method(method_name).call
       positions.each { |p| persist_position(wallet, p) }
 
@@ -128,7 +126,6 @@ class WalletBalanceService
   end
 
   def persist_position(wallet, position)
-    Rails.logger.info "WalletBalanceService#persist_position #{wallet} #{position[:asset]}"
     pos = @wallet.positions.find_or_initialize_by(symbol: position[:asset], sub_wallet: wallet)
     pos.amount = position[:amount]
     pos.save! unless pos.new_record? && pos.amount.zero?
