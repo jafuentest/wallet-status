@@ -1,5 +1,5 @@
 # config valid for current version and patch releases of Capistrano
-lock '~> 3.18.1'
+# lock '~> 3.18.1'
 
 set :application, 'wallet_status'
 set :repo_url, 'git@github.com:jafuentest/wallet-status.git'
@@ -57,6 +57,7 @@ set :puma_init_active_record, true # Change to false when not using ActiveRecord
 
 # Name for the systemd service, default: "puma_#{fetch(:application)}_#{fetch(:stage)}"
 set :puma_service_unit_name, 'puma_wallet_status.service'
+set :puma_systemctl_user, :system
 
 namespace :puma do
   desc 'Create Directories for Puma Pids and Socket'
