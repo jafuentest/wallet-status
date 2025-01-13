@@ -204,10 +204,10 @@ GEM
       net-ssh (>= 5.0.0, < 8.0.0)
     net-smtp (0.5.0)
       net-protocol
-    net-ssh (7.2.3)
-    newrelic_rpm (9.15.0)
-    nio4r (2.7.3)
-    nokogiri (1.17.1)
+    net-ssh (7.3.0)
+    newrelic_rpm (9.16.1)
+    nio4r (2.7.4)
+    nokogiri (1.17.2)
       mini_portile2 (~> 2.8.2)
       racc (~> 1.4)
     orm_adapter (0.5.0)
@@ -369,6 +369,7 @@ DEPENDENCIES
   jsbundling-rails
   logger
   newrelic_rpm
+  nokogiri (< 1.18)
   ostruct
   parallel (~> 1.22)
   pg (~> 1.2)

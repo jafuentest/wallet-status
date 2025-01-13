@@ -54,6 +54,9 @@ gem 'stimulus-rails'
 # Make parallel requests
 gem 'parallel', '~> 1.22'
 
+# Nokogiri requires glibc >= 2.28 starting from version 1.18
+gem 'nokogiri', '< 1.18'
+
 # Just to silence ruby 3.5 warnings, may remove some in the future
 gem 'bigdecimal'
 gem 'fiddle'
