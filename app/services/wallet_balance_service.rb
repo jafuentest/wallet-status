@@ -6,6 +6,7 @@ class WalletBalanceService
   include WalletBalanceService::SpotTrades
 
   POSITION_PERSIST_HASH = {
+    'dual_investment' => :dual_investment_wallet,
     'spot' => :spot_wallet,
     'flexible' => :flexible_wallet,
     'locked' => :locked_wallet
@@ -53,15 +54,15 @@ class WalletBalanceService
   def flexible_wallet
     return @flexible_wallet if defined? @flexible_wallet
 
-    @flexible_wallet = client.simple_earn_flexible_position(recvWindow: 60_000, size: 100)[:rows]
-    formatted_wallet_data(@flexible_wallet, 'flexible')
+    rows = client.flexible_product_position(recvWindow: 60_000, size: 100)[:rows]
+    @flexible_wallet = formatted_wallet_data(rows, 'flexible')
   end
 
   def locked_wallet
     return @locked_wallet if defined? @locked_wallet
 
-    @locked_wallet = client.simple_earn_locked_position(recvWindow: 60_000, size: 100)[:rows]
-    formatted_wallet_data(@locked_wallet, 'locked')
+    rows = client.flexible_product_position(recvWindow: 60_000, size: 100)[:rows]
+    @locked_wallet = formatted_wallet_data(rows, 'locked')
   end
 
   def spot_wallet
@@ -70,6 +71,18 @@ class WalletBalanceService
     @spot_wallet = client.account(recvWindow: 60_000)[:balances]
       .select { |e| normal_spot_balance?(e) }
       .each { |e| e[:amount] = e[:free].to_f }
+  end
+
+  def dual_investment_wallet
+    return @dual_investment_wallet if defined? @dual_investment_wallet
+
+    list = client.dual_investments(status: 'PURCHASE_SUCCESS', recvWindow: 60_000, size: 100)[:list]
+    @dual_investment_wallet = list.group_by { |h| h[:investCoin] }.map do |e|
+      {
+        asset: e.first,
+        amount: e.last.sum { |h| h[:subscriptionAmount].to_f }
+      }
+    end
   end
 
   def price(pos)
