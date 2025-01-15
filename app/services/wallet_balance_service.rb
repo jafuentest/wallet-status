@@ -111,4 +111,12 @@ class WalletBalanceService
       .where.not(symbol: symbols)
       .delete_all
   end
+
+  def tickers
+    return @tickers if defined? @tickers
+
+    @tickers = Rails.cache.fetch('tickers', expires_in: 10.minutes) do
+      client.ticker_price
+    end
+  end
 end

@@ -4,12 +4,10 @@ module WalletBalanceService::Margin
       log_margin_transfer
       break if (Time.current - start_margin_transfer) < 1.minute
 
-      transfers = client.margin_transfer_history(
-        recvWindow: 60_000,
-        startTime: start_margin_transfer.strftime('%Q'), endTime: end_margin_transfer.strftime('%Q')
-      )
+      transfers = client.margin_transfer_history(start_time: start_margin_transfer, end_time: end_margin_transfer).each do |transfer|
+        create_transaction_from_margin_transfer(transfer)
+      end
 
-      transfers[:rows].each { |transfer| create_transaction_from_margin_transfer(transfer) }
       update_wallet_margin_transfer
     end
   end
