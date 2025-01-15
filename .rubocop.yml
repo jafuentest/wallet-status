@@ -12,7 +12,7 @@ AllCops:
     - tmp/**/*
     - vendor/**/*
 
-  TargetRubyVersion: 2.7.5
+  TargetRubyVersion: 3.3.5
 
 Layout/CaseIndentation:
   EnforcedStyle: end
