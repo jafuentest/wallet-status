@@ -15,7 +15,19 @@
 #  updated_at  :datetime         not null
 #
 class Wallet < ApplicationRecord
+  FETCHER_CLASSES = {
+    'binance' => [
+      TransactionFetchers::Binance::Convertion,
+      TransactionFetchers::Binance::Margin,
+      TransactionFetchers::Binance::Spot
+    ]
+  }.freeze
+
   belongs_to :user
   has_many :positions, dependent: :destroy
   has_many :transactions, dependent: :destroy
+
+  def fetcher_classes
+    FETCHER_CLASSES[service]
+  end
 end

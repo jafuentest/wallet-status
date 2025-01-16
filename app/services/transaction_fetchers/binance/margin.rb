@@ -4,7 +4,7 @@ class TransactionFetchers::Binance::Margin < TransactionFetchers::Binance::Base
       log_fetch
       break if (Time.current - start_time) < 1.minute
 
-      transfers = client.margin_transfer_history(start_time:, end_time:).each do |transfer|
+      client.margin_transfer_history(start_time:, end_time:).each do |transfer|
         create_transaction(transfer)
       end
 
