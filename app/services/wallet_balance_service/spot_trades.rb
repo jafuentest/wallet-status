@@ -3,7 +3,7 @@ module WalletBalanceService::SpotTrades
     symbol, pair = trade_pair
     log_spot_trade(pair)
 
-    my_trades = client.my_trades(recvWindow: 60_000, symbol: symbol, orderId: last_spot_trade(symbol))
+    my_trades = client.my_trades(symbol:, order_id: last_spot_trade(symbol))
     my_trades.each { |my_trade| create_transaction_from_spot_trade(my_trade, pair) }
 
     last_order_id = my_trades.last&.dig(:orderId) || return

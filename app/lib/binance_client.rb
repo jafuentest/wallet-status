@@ -45,6 +45,10 @@ class BinanceClient
     end
   end
 
+  def my_trades(symbol:, order_id:)
+    client.my_trades(recvWindow: RECV_WINDOW, symbol:, orderId: order_id)
+  end
+
   def convert_trade_flow(start_time:, end_time:)
     res = client.convert_trade_flow(
       recvWindow: RECV_WINDOW,
