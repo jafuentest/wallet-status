@@ -1,19 +1,5 @@
-module WalletBalanceService::SpotTrades
-  def fetch_pair_trades(trade_pair)
-    symbol, pair = trade_pair
-    log_spot_trade(pair)
-
-    my_trades = client.my_trades(symbol:, order_id: last_spot_trade(symbol))
-    my_trades.each { |my_trade| create_transaction_from_spot_trade(my_trade, pair) }
-
-    last_order_id = my_trades.last&.dig(:orderId) || return
-    @wallet.update(api_details: @wallet.api_details.merge("#{symbol}_last_spot_order_id" => last_order_id))
-  rescue StandardError => e
-    Rails.logger.error "Error fetching trades for #{symbol}: #{e}"
-    raise
-  end
-
-  def fetch_spot_trades
+class TransactionFetchers::Binance::Spot < TransactionFetchers::Binance::Base
+  def fetch
     run_at = Time.zone.now
 
     %w[usdt busd usdc btc eth bnb others].each do |parent_symbol|
@@ -22,9 +8,23 @@ module WalletBalanceService::SpotTrades
 
       slices.each do |pair|
         # Spread calls to binance client to prevent API lock from excessive calls
-        delay(run_at: run_at += 0.6.seconds).fetch_pair_trades(pair)
+        delay(run_at: run_at += 0.6.seconds).fetch_pair(pair)
       end
     end
+  end
+
+  def fetch_pair(trade_pair)
+    symbol, pair = trade_pair
+    log_fetch(pair)
+
+    my_trades = client.my_trades(recvWindow: 60_000, symbol: symbol, orderId: last_trade(symbol))
+    my_trades.each { |my_trade| create_transaction(my_trade, pair) }
+
+    last_order_id = my_trades.last&.dig(:orderId) || return
+    @wallet.update(api_details: @wallet.api_details.merge("#{symbol}_last_spot_order_id" => last_order_id))
+  rescue StandardError => e
+    Rails.logger.error "Error fetching trades for #{symbol}: #{e}"
+    raise
   end
 
   private
@@ -37,15 +37,15 @@ module WalletBalanceService::SpotTrades
     slices.each_slice(slice_size)
   end
 
-  def log_spot_trade(pair)
-    Rails.logger.debug { "Fetching #{pair} spot trades after spot order #{last_spot_trade(pair)}" }
+  def log_fetch(pair)
+    Rails.logger.debug { "Fetching #{pair} spot trades after spot order #{last_trade(pair)}" }
   end
 
-  def last_spot_trade(pair)
+  def last_trade(pair)
     @wallet.api_details["#{pair}_last_spot_order_id"]
   end
 
-  def create_transaction_from_spot_trade(spot_trade, pair)
+  def create_transaction(spot_trade, pair)
     transaction_attributes = assets(spot_trade, pair).merge(
       timestamp: Time.strptime(spot_trade[:time].to_s, '%Q'),
       order_id: spot_trade[:orderId],
