@@ -1,11 +1,7 @@
 require 'binance'
 
 class WalletBalanceService
-  include WalletBalanceService::Convert
-  include WalletBalanceService::Margin
-  include WalletBalanceService::SpotTrades
-
-  POSITION_PERSIST_HASH = {
+  POSITION_METHODS = {
     'dual_investment' => :dual_investment_wallet,
     'spot' => :spot_wallet,
     'flexible' => :flexible_wallet,
@@ -19,11 +15,11 @@ class WalletBalanceService
   end
 
   def update_positions
-    Parallel.map(POSITION_PERSIST_HASH, in_threads: POSITION_PERSIST_HASH.size) do |wallet, method_name|
+    Parallel.map(POSITION_METHODS, in_threads: POSITION_METHODS.size) do |wallet_name, method_name|
       positions = method(method_name).call
-      positions.each { |p| persist_position(wallet, p) }
+      positions.each { |p| persist_position(wallet_name, p) }
 
-      delete_missing_positions(wallet, positions.pluck(:asset)) unless wallet == 'spot'
+      delete_missing_positions(wallet_name, positions.pluck(:asset)) unless wallet_name == 'spot'
     end
 
     wallet.positions.where(amount: 0).delete_all
@@ -65,7 +61,7 @@ class WalletBalanceService
   add_method_tracer :locked_wallet, 'Custom/WalletBalanceService#locked_wallet'
 
   def dual_investment_wallet
-    client.dual_investment_wallet
+    client.dual_investments
   end
 
   def non_zero_balance?(position)
@@ -83,14 +79,14 @@ class WalletBalanceService
     @spot_balances = wallet.positions.spot.to_a
   end
 
-  def persist_position(wallet, position)
-    pos = wallet.positions.find_or_initialize_by(symbol: position[:asset], sub_wallet: wallet)
+  def persist_position(sub_wallet, position)
+    pos = wallet.positions.find_or_initialize_by(symbol: position[:asset], sub_wallet:)
     pos.amount = position[:amount]
     pos.save! unless pos.new_record? && pos.amount.zero?
   end
 
-  def delete_missing_positions(wallet, symbols)
-    wallet.positions.send(wallet)
+  def delete_missing_positions(sub_wallet, symbols)
+    wallet.positions.send(sub_wallet)
       .where.not(symbol: symbols)
       .delete_all
   end
