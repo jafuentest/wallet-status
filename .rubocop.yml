@@ -48,6 +48,7 @@ Metrics/ClassLength:
   CountAsOne: ['array', 'hash', 'heredoc']
 
 Metrics/MethodLength:
+  CountAsOne: ['array', 'hash', 'heredoc']
   Exclude:
     - db/migrate/*
 

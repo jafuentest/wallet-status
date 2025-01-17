@@ -37,12 +37,18 @@ class TransactionFetchers::Binance::Convertion < TransactionFetchers::Binance::B
     return unless convertion[:orderStatus] == 'SUCCESS'
 
     wallet.transactions.convertions.create!(
-      from_asset: convertion[:fromAsset], from_amount: convertion[:fromAmount],
-      to_asset: convertion[:toAsset], to_amount: convertion[:toAmount],
-      timestamp: Time.strptime(convertion[:createTime].to_s, '%Q'),
-      order_id: convertion[:orderId]
+      from_asset: convertion[:fromAsset],
+      from_amount: convertion[:fromAmount],
+      to_asset: convertion[:toAsset],
+      to_amount: convertion[:toAmount],
+      order_id: convertion[:orderId],
+      timestamp: Time.strptime(convertion[:createTime].to_s, '%Q')
     )
   rescue ActiveRecord::RecordNotUnique
+    log_duplicate_warning(convertion)
+  end
+
+  def log_duplicate_warning(convertion)
     Rails.logger.warn "Fetched existing transaction, order_id: #{convertion[:orderId]}, wallet_id: #{wallet.id}}"
   end
 end

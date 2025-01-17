@@ -64,17 +64,29 @@ class TransactionFetchers::Binance::Spot < TransactionFetchers::Binance::Base
 
   def from(transaction_hash, pair)
     if transaction_hash[:isBuyer]
-      { from_asset: pair.last, from_amount: transaction_hash[:quoteQty] }
+      {
+        from_asset: pair.last,
+        from_amount: transaction_hash[:quoteQty]
+      }
     else
-      { from_asset: pair.first, from_amount: transaction_hash[:qty] }
+      {
+        from_asset: pair.first,
+        from_amount: transaction_hash[:qty]
+      }
     end
   end
 
   def to(transaction_hash, pair)
     if transaction_hash[:isBuyer]
-      { to_asset: pair.first, to_amount: transaction_hash[:qty] }
+      {
+        to_asset: pair.first,
+        to_amount: transaction_hash[:qty]
+      }
     else
-      { to_asset: pair.last, to_amount: transaction_hash[:quoteQty] }
+      {
+        to_asset: pair.last,
+        to_amount: transaction_hash[:quoteQty]
+      }
     end
   end
 end
