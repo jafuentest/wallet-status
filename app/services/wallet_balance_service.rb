@@ -64,26 +64,9 @@ class WalletBalanceService
   end
   add_method_tracer :locked_wallet, 'Custom/WalletBalanceService#locked_wallet'
 
-  def spot_wallet
-    client.locked_product_position
-  end
-  add_method_tracer :spot_wallet, 'Custom/WalletBalanceService#spot_wallet'
-
   def dual_investment_wallet
     client.dual_investment_wallet
   end
-
-  def price(pos)
-    traded_against = pos[:symbol] == 'LUNC' ? 'BUSD' : 'USDT'
-    "#{pos[:symbol]}#{traded_against}"
-  end
-
-  def tickers
-    Rails.cache.fetch('tickers', expires_in: 10.minutes) do
-      @tickers = client.ticker_price
-    end
-  end
-  add_method_tracer :tickers, 'Custom/WalletBalanceService#tickers'
 
   def non_zero_balance?(position)
     position[:amount].positive? ||
