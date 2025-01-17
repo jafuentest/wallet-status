@@ -21,7 +21,7 @@ class WalletBalanceService
   end
 
   def update_positions
-    Parallel.map(POSITION_PERSIST_HASH) do |wallet, method_name|
+    Parallel.map(POSITION_PERSIST_HASH, in_threads: POSITION_PERSIST_HASH.size) do |wallet, method_name|
       positions = method(method_name).call
       positions.each { |p| persist_position(wallet, p) }
 
@@ -48,6 +48,7 @@ class WalletBalanceService
 
     symbols.flatten
   end
+  add_method_tracer :updated_symbols, 'Custom/WalletBalanceService#updated_symbols'
 
   private
 
@@ -57,13 +58,15 @@ class WalletBalanceService
     rows = client.flexible_product_position(recvWindow: 60_000, size: 100)[:rows]
     @flexible_wallet = formatted_wallet_data(rows, 'flexible')
   end
+  add_method_tracer :flexible_wallet, 'Custom/WalletBalanceService#flexible_wallet'
 
   def locked_wallet
     return @locked_wallet if defined? @locked_wallet
 
-    rows = client.flexible_product_position(recvWindow: 60_000, size: 100)[:rows]
+    rows = client.locked_product_position(recvWindow: 60_000, size: 100)[:rows]
     @locked_wallet = formatted_wallet_data(rows, 'locked')
   end
+  add_method_tracer :locked_wallet, 'Custom/WalletBalanceService#locked_wallet'
 
   def spot_wallet
     return @spot_wallet if defined? @spot_wallet
@@ -72,6 +75,7 @@ class WalletBalanceService
       .select { |e| normal_spot_balance?(e) }
       .each { |e| e[:amount] = e[:free].to_f }
   end
+  add_method_tracer :spot_wallet, 'Custom/WalletBalanceService#spot_wallet'
 
   def dual_investment_wallet
     return @dual_investment_wallet if defined? @dual_investment_wallet
@@ -95,6 +99,7 @@ class WalletBalanceService
       @tickers = client.ticker_price
     end
   end
+  add_method_tracer :tickers, 'Custom/WalletBalanceService#tickers'
 
   def empty_position(asset, amount)
     { asset: asset, free: amount, locked: 0.0 }
