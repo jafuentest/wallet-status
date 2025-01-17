@@ -1,5 +1,3 @@
-require 'binance'
-
 class WalletBalanceService
   POSITION_METHODS = {
     'dual_investment' => :dual_investment_wallet,
@@ -40,7 +38,6 @@ class WalletBalanceService
       syms + slices.map(&:first)
     end
   end
-  add_method_tracer :updated_symbols, 'Custom/WalletBalanceService#updated_symbols'
 
   private
 
@@ -53,12 +50,10 @@ class WalletBalanceService
   def flexible_wallet
     client.flexible_product_position
   end
-  add_method_tracer :flexible_wallet, 'Custom/WalletBalanceService#flexible_wallet'
 
   def locked_wallet
     client.locked_product_position
   end
-  add_method_tracer :locked_wallet, 'Custom/WalletBalanceService#locked_wallet'
 
   def dual_investment_wallet
     client.dual_investments

@@ -1,4 +1,4 @@
-module TransactionFetchers
+module TransactionFetchers # rubocop:disable Style/ClassAndModuleChildren
   module Binance
     class Base
       def initialize(wallet)
