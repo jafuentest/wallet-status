@@ -56,11 +56,13 @@ gem 'parallel', '~> 1.22'
 
 # Nokogiri requires glibc >= 2.28 starting from version 1.18
 gem 'nokogiri', '< 1.18'
+gem 'concurrent-ruby', '< 1.3.5'
 
-# Just to silence ruby 3.5 warnings, may remove some in the future
+# Gems that were or will be removed from Ruby standard library
 gem 'bigdecimal'
 gem 'fiddle'
 gem 'logger'
+gem 'mutex_m'
 gem 'ostruct'
 gem 'rdoc'
 
