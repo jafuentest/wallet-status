@@ -8,11 +8,11 @@ class RecurringTasks::FetchTransations
     Rails.logger.info 'Creating fetch transations jobs'
 
     User.find_each do |user|
-      binance = WalletBalanceService.new(user)
-
-      binance.delay.fetch_spot_trades
-      binance.delay.fetch_converts
-      binance.delay.fetch_margin_transfers
+      user.wallets.each do |wallet|
+        wallet.fetcher_classes.each do |fetcher_class|
+          fetcher_class.new(wallet).delay.fetch
+        end
+      end
     end
   end
 end
