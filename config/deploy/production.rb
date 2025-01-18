@@ -45,7 +45,7 @@ server 'wallet-status.wikifuentes.com', user: 'ec2-user', roles: %w[web app db]
 set :ssh_options, {
   keys: %w[~/.ssh/wallet-status.pem],
   forward_agent: true,
-  auth_methods: %w[publickey]
+  auth_methods: %w[publickey],
 }
 
 # The server-based syntax can be used to override options:

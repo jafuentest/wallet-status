@@ -3,7 +3,7 @@ class WalletBalanceService
     'dual_investment' => :dual_investment_wallet,
     'spot' => :spot_wallet,
     'flexible' => :flexible_wallet,
-    'locked' => :locked_wallet
+    'locked' => :locked_wallet,
   }.freeze
 
   def initialize(user)

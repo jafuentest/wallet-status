@@ -52,17 +52,11 @@ Metrics/MethodLength:
   Exclude:
     - db/migrate/*
 
-Rails/CreateTableWithTimestamps:
-  Enabled: false
-
 Rails/I18nLocaleTexts:
   Enabled: false
 
-Rails/SkipsModelValidations:
-  Enabled: false
-
 Style/ClassAndModuleChildren:
-  EnforcedStyle: compact
+  Enabled: false
 
 Style/Documentation:
   Enabled: false
@@ -73,5 +67,8 @@ Style/FrozenStringLiteralComment:
 Style/RegexpLiteral:
   EnforcedStyle: mixed
 
-# Style/TrailingCommaInHashLiteral:
-#   EnforcedStyleForMultiline: comma
+Style/TrailingCommaInArrayLiteral:
+  EnforcedStyleForMultiline: comma
+
+Style/TrailingCommaInHashLiteral:
+  EnforcedStyleForMultiline: comma

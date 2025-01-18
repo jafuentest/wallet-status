@@ -24,7 +24,7 @@ class BinanceClient
         .group_by { |h| h[:investCoin] }.map do |e|
           {
             asset: e.first,
-            amount: e.last.sum { |h| h[:subscriptionAmount].to_f }
+            amount: e.last.sum { |h| h[:subscriptionAmount].to_f },
           }
         end
     end

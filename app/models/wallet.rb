@@ -19,8 +19,8 @@ class Wallet < ApplicationRecord
     'binance' => [
       TransactionFetchers::Binance::Convertion,
       TransactionFetchers::Binance::Margin,
-      TransactionFetchers::Binance::Spot
-    ]
+      TransactionFetchers::Binance::Spot,
+    ],
   }.freeze
 
   belongs_to :user
