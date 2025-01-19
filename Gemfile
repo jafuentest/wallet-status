@@ -54,10 +54,15 @@ gem 'stimulus-rails'
 # Make parallel requests
 gem 'parallel', '~> 1.22'
 
-# Just to silence ruby 3.5 warnings, may remove some in the future
+# Hotfix for some incompatibility issues
+gem 'concurrent-ruby', '< 1.3.5'
+gem 'nokogiri', '< 1.18'
+
+# Gems that were or will be removed from Ruby standard library
 gem 'bigdecimal'
 gem 'fiddle'
 gem 'logger'
+gem 'mutex_m'
 gem 'ostruct'
 gem 'rdoc'
 
