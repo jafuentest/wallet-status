@@ -54,9 +54,9 @@ gem 'stimulus-rails'
 # Make parallel requests
 gem 'parallel', '~> 1.22'
 
-# Nokogiri requires glibc >= 2.28 starting from version 1.18
-gem 'nokogiri', '< 1.18'
+# Hotfix for some incompatibility issues
 gem 'concurrent-ruby', '< 1.3.5'
+gem 'nokogiri', '< 1.18'
 
 # Gems that were or will be removed from Ruby standard library
 gem 'bigdecimal'
