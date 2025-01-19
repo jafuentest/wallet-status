@@ -1,5 +1,5 @@
 module WalletBalanceService::CostBasisCalculator
-  FIAT_CURRENCIES = %w[USDT EUR GBP RUB]
+  FIAT_CURRENCIES = %w[USD EUR GBP RUB].freeze
 
   def calculate_cost_basis
     scope = @user.binance_wallet.transactions
@@ -11,7 +11,7 @@ module WalletBalanceService::CostBasisCalculator
 
       # Get the cost of the transaction
       t_cost_basis = get_cost(t.from_amount, t.from_asset)
-      raise RuntimeError.new('Missing cost basis of origin asset') if t_cost_basis.blank?
+      raise 'Missing cost basis of origin asset' if t_cost_basis.blank?
 
       ActiveRecord::Base.transaction do
         # Substract from purchasing asset's cost basis
@@ -45,15 +45,15 @@ module WalletBalanceService::CostBasisCalculator
 
   def get_cost(amount, asset)
     if FIAT_CURRENCIES.include?(asset)
-      return %w[USD USDT] ? amount : covert_to_usd(amount, asset)
+      return asset == 'USD' ? amount : covert_to_usd(amount, asset)
     end
 
     latest_asset_log(asset).unit_cost * amount
   end
 
-  def covert_to_usd(amount, currency)
+  def covert_to_usd(amount, _currency)
     # Call some API tbd
-    return amount
+    amount
   end
 
   def latest_asset_log(asset)
