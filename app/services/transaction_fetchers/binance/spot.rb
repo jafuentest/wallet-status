@@ -18,7 +18,7 @@ module TransactionFetchers::Binance
       symbol, pair = trade_pair
       log_fetch(pair)
 
-      my_trades = client.my_trades(recvWindow: 60_000, symbol: symbol, orderId: last_trade(symbol))
+      my_trades = client.my_trades(symbol: symbol, order_id: last_trade(symbol))
       my_trades.each { |my_trade| create_transaction(my_trade, pair) }
 
       last_order_id = my_trades.last&.dig(:orderId) || return
