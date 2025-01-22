@@ -5,8 +5,14 @@ class BinanceClient
 
   attr_accessor :client
 
-  def initialize(key:, secret:)
-    @client = Binance::Spot.new(key:, secret:)
+  def initialize(key: nil, secret: nil, wallet: nil)
+    if wallet.present?
+      @client = Binance::Spot.new(key: wallet.api_key, secret: wallet.api_secret)
+    elsif key.present? && secret.present?
+      @client = Binance::Spot.new(key:, secret:)
+    else
+      raise ArgumentError, 'Either wallet or key and secret must be provided'
+    end
   end
 
   def account
