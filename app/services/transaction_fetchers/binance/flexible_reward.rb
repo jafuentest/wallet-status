@@ -57,6 +57,7 @@ module TransactionFetchers::Binance
 
     def create_transaction(reward)
       wallet.transactions.create!(
+        order_id: reward[:time].to_s,
         order_type: 'flexible_reward',
         to_asset: reward[:asset],
         to_amount: reward[:rewards],
