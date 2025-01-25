@@ -110,6 +110,20 @@ class BinanceClient
   end
   add_method_tracer :flexible_rewards_history, 'Custom/BinanceClient#flexible_rewards_history'
 
+  def locked_rewards_history(end_time: nil)
+    NewRelic::Agent.disable_all_tracing do
+      res = client.locked_rewards_history(
+        recvWindow: RECV_WINDOW,
+        type: 'ALL',
+        size: 100,
+        endTime: time_in_format(end_time)
+      )
+
+      res[:rows]
+    end
+  end
+  add_method_tracer :locked_rewards_history, 'Custom/BinanceClient#locked_rewards_history'
+
   private
 
   def normal_spot_balance?(position)
