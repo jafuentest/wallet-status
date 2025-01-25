@@ -1,3 +1,6 @@
+# Ruby version, should match Gemfile
+set :rvm_ruby_version, '3.3.5'
+
 # config valid for current version and patch releases of Capistrano
 # lock '~> 3.18.1'
 
@@ -38,10 +41,6 @@ append :linked_dirs, 'log', 'tmp/pids', 'tmp/cache', 'tmp/sockets', 'public/syst
 
 # Uncomment the following to require manually verifying the host key before first deploy.
 # set :ssh_options, verify_host_key: :secure
-
-set :rvm_ruby_version, '3.3.5'
-
-set :rails_env, 'production'
 
 set :bundle_without, %w[development test]
 

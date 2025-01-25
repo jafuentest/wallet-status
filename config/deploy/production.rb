@@ -5,6 +5,8 @@
 
 # server "example.com", user: "deploy", roles: %w{app db web}, my_property: :my_value
 # server "example.com", user: "deploy", roles: %w{app web}, other_property: :other_value
+# server "db.example.com", user: "deploy", roles: %w{db}
+
 server 'wallet-status.wikifuentes.com', user: 'ec2-user', roles: %w[web app db]
 
 # role-based syntax
@@ -26,6 +28,8 @@ server 'wallet-status.wikifuentes.com', user: 'ec2-user', roles: %w[web app db]
 # For available Capistrano configuration variables see the documentation page.
 # http://capistranorb.com/documentation/getting-started/configuration/
 # Feel free to add new variables to customise your setup.
+
+set :rails_env, 'production'
 
 # Custom SSH Options
 # ==================
