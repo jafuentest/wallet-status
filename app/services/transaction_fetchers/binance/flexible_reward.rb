@@ -18,14 +18,14 @@ module TransactionFetchers::Binance
     private
 
     def process_batch(timestamp)
-      log_fetch(timestamp)
+      Rails.logger.debug { "Fetching flexible rewards up to #{timestamp}" }
       transactions = client.locked_rewards_history(end_time: timestamp)
-        .select { |reward| reward[:time] > last_fetch_timestamp }
+        .select { |reward| reward[:time] > last_fetch_timestamp.strftime('%Q').to_i }
 
       if transactions.empty?
         return nil if timestamp == last_fetch_timestamp
 
-        [timestamp - 30.days, MIN_TIMESTAMP].max
+        return [timestamp - 30.days, last_fetch_timestamp].max
       end
 
       transactions.each { |reward| create_transaction(reward) }
