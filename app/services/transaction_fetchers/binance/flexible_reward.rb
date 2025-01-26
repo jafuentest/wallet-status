@@ -19,7 +19,7 @@ module TransactionFetchers::Binance
 
     def process_batch(timestamp)
       Rails.logger.debug { "Fetching flexible rewards up to #{timestamp}" }
-      transactions = client.locked_rewards_history(end_time: timestamp)
+      transactions = client.flexible_rewards_history(end_time: timestamp)
         .select { |reward| reward[:time] > last_fetch_timestamp.strftime('%Q').to_i }
 
       if transactions.empty?
