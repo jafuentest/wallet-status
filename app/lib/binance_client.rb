@@ -75,7 +75,7 @@ class BinanceClient
     NewRelic::Agent.disable_all_tracing do
       res = client.convert_trade_flow(
         recvWindow: RECV_WINDOW,
-        startTime: time_in_format(start_time)
+        startTime: time_in_format(start_time),
         endTime: time_in_format(end_time)
       )
 
@@ -88,7 +88,7 @@ class BinanceClient
     NewRelic::Agent.disable_all_tracing do
       res = client.margin_transfer_history(
         recvWindow: RECV_WINDOW,
-        startTime: time_in_format(start_time)
+        startTime: time_in_format(start_time),
         endTime: time_in_format(end_time)
       )
 

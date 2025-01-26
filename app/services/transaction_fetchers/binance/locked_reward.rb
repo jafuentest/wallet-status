@@ -1,5 +1,5 @@
 module TransactionFetchers::Binance
-  class FlexibleReward < Base
+  class LockedReward < Base
     MIN_TIMESTAMP = Time.utc(2022, 1, 1).to_datetime
     PAGE_SIZE = 10
 
@@ -11,20 +11,15 @@ module TransactionFetchers::Binance
         break if timestamp.blank?
       end
 
-      wallet.update(api_details: wallet.api_details.merge('flexible_last_fetch' => start_timestamp))
+      update_wallet
     end
 
     private
 
-    def fetch_transactions(timestamp)
-      Rails.logger.debug { "Fetching flexible rewards up to #{timestamp}" }
-
-      client.flexible_rewards_history(end_time: timestamp)
-        .select { |reward| reward[:time] > last_fetch_timestamp }
-    end
-
     def process_batch(timestamp)
-      transactions = call_api(timestamp)
+      log_fetch(timestamp)
+      transactions = client.locked_rewards_history(end_time: timestamp)
+        .select { |reward| reward[:time] > last_fetch_timestamp }
 
       if transactions.empty?
         return nil if timestamp == MIN_TIMESTAMP
@@ -42,10 +37,18 @@ module TransactionFetchers::Binance
       last_time
     end
 
+    def update_wallet
+      wallet.update(api_details: wallet.api_details.merge('locked_last_fetch' => start_timestamp))
+    end
+
+    def log_fetch(timestamp)
+      Rails.logger.debug { "Fetching locked rewards up to #{timestamp}" }
+    end
+
     def last_fetch_timestamp
       return @last_fetch_timestamp if defined?(@last_fetch_timestamp)
 
-      timestamp_str = wallet.api_details['flexible_last_fetch']
+      timestamp_str = wallet.api_details['locked_last_fetch']
       date_time = timestamp_str.present? ? DateTime.parse(timestamp_str) : DateTime.new
       @last_fetch_timestamp = date_time.strftime('%Q').to_i
     end
@@ -58,8 +61,8 @@ module TransactionFetchers::Binance
 
     def create_transaction(reward)
       wallet.transactions.create!(
-        order_id: "#{reward[:asset]}-#{reward[:time]}",
-        order_type: 'flexible_reward',
+        order_id: "#{reward[:positionId]}-#{reward[:time]}",
+        order_type: 'locked_reward',
         to_asset: reward[:asset],
         to_amount: reward[:rewards],
         timestamp: Time.strptime(reward[:time].to_s, '%Q')
