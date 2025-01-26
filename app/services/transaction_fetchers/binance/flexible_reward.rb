@@ -2,6 +2,7 @@ module TransactionFetchers::Binance
   class FlexibleReward < Base
     MIN_TIMESTAMP = Time.utc(2022, 1, 1).to_datetime
     PAGE_SIZE = 10
+    TIMESTAMP_KEY = 'flexible_last_fetch'.freeze
 
     def fetch
       timestamp = start_timestamp
@@ -11,23 +12,18 @@ module TransactionFetchers::Binance
         break if timestamp.blank?
       end
 
-      wallet.update(api_details: wallet.api_details.merge('flexible_last_fetch' => start_timestamp))
+      wallet.update(api_details: wallet.api_details.merge(TIMESTAMP_KEY => start_timestamp))
     end
 
     private
 
-    def fetch_transactions(timestamp)
-      Rails.logger.debug { "Fetching flexible rewards up to #{timestamp}" }
-
-      client.flexible_rewards_history(end_time: timestamp)
-        .select { |reward| reward[:time] > last_fetch_timestamp }
-    end
-
     def process_batch(timestamp)
-      transactions = call_api(timestamp)
+      log_fetch(timestamp)
+      transactions = client.locked_rewards_history(end_time: timestamp)
+        .select { |reward| reward[:time] > last_fetch_timestamp }
 
       if transactions.empty?
-        return nil if timestamp == MIN_TIMESTAMP
+        return nil if timestamp == last_fetch_timestamp
 
         [timestamp - 30.days, MIN_TIMESTAMP].max
       end
@@ -45,9 +41,9 @@ module TransactionFetchers::Binance
     def last_fetch_timestamp
       return @last_fetch_timestamp if defined?(@last_fetch_timestamp)
 
-      timestamp_str = wallet.api_details['flexible_last_fetch']
-      date_time = timestamp_str.present? ? DateTime.parse(timestamp_str) : DateTime.new
-      @last_fetch_timestamp = date_time.strftime('%Q').to_i
+      timestamp_str = wallet.api_details[TIMESTAMP_KEY]
+      date_time = timestamp_str.present? ? DateTime.parse(timestamp_str) : MIN_TIMESTAMP
+      @last_fetch_timestamp = date_time
     end
 
     def start_timestamp
@@ -65,10 +61,6 @@ module TransactionFetchers::Binance
         timestamp: Time.strptime(reward[:time].to_s, '%Q')
       )
     rescue ActiveRecord::RecordNotUnique
-      log_duplicate_warning(reward)
-    end
-
-    def log_duplicate_warning(reward)
       Rails.logger.warn "Fetched existing reward transaction, timestamp: #{reward[:time]}, wallet_id: #{wallet.id}}"
     end
   end

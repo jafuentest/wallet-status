@@ -2,6 +2,7 @@ module TransactionFetchers::Binance
   class LockedReward < Base
     MIN_TIMESTAMP = Time.utc(2022, 1, 1).to_datetime
     PAGE_SIZE = 10
+    TIMESTAMP_KEY = 'locked_last_fetch'.freeze
 
     def fetch
       timestamp = start_timestamp
@@ -11,7 +12,7 @@ module TransactionFetchers::Binance
         break if timestamp.blank?
       end
 
-      update_wallet
+      wallet.update(api_details: wallet.api_details.merge(TIMESTAMP_KEY => start_timestamp))
     end
 
     private
@@ -37,20 +38,12 @@ module TransactionFetchers::Binance
       last_time
     end
 
-    def update_wallet
-      wallet.update(api_details: wallet.api_details.merge('locked_last_fetch' => start_timestamp))
-    end
-
-    def log_fetch(timestamp)
-      Rails.logger.debug { "Fetching locked rewards up to #{timestamp}" }
-    end
-
     def last_fetch_timestamp
       return @last_fetch_timestamp if defined?(@last_fetch_timestamp)
 
-      timestamp_str = wallet.api_details['locked_last_fetch']
-      date_time = timestamp_str.present? ? DateTime.parse(timestamp_str) : DateTime.new
-      @last_fetch_timestamp = date_time.strftime('%Q').to_i
+      timestamp_str = wallet.api_details[TIMESTAMP_KEY]
+      date_time = timestamp_str.present? ? DateTime.parse(timestamp_str) : MIN_TIMESTAMP
+      @last_fetch_timestamp = date_time
     end
 
     def start_timestamp
@@ -68,10 +61,6 @@ module TransactionFetchers::Binance
         timestamp: Time.strptime(reward[:time].to_s, '%Q')
       )
     rescue ActiveRecord::RecordNotUnique
-      log_duplicate_warning(reward)
-    end
-
-    def log_duplicate_warning(reward)
       Rails.logger.warn "Fetched existing reward transaction, timestamp: #{reward[:time]}, wallet_id: #{wallet.id}}"
     end
   end
