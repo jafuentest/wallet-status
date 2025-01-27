@@ -5,8 +5,14 @@ class BinanceClient
 
   attr_accessor :client
 
-  def initialize(key:, secret:)
-    @client = Binance::Spot.new(key:, secret:)
+  def initialize(key: nil, secret: nil, wallet: nil)
+    if wallet.present?
+      @client = Binance::Spot.new(key: wallet.api_key, secret: wallet.api_secret)
+    elsif key.present? && secret.present?
+      @client = Binance::Spot.new(key:, secret:)
+    else
+      raise ArgumentError, 'Either wallet or key and secret must be provided'
+    end
   end
 
   def account
@@ -69,8 +75,8 @@ class BinanceClient
     NewRelic::Agent.disable_all_tracing do
       res = client.convert_trade_flow(
         recvWindow: RECV_WINDOW,
-        startTime: start_time.strftime('%Q'),
-        endTime: end_time.strftime('%Q')
+        startTime: time_in_format(start_time),
+        endTime: time_in_format(end_time)
       )
 
       res[:list]
@@ -82,8 +88,8 @@ class BinanceClient
     NewRelic::Agent.disable_all_tracing do
       res = client.margin_transfer_history(
         recvWindow: RECV_WINDOW,
-        startTime: start_time.strftime('%Q'),
-        endTime: end_time.strftime('%Q')
+        startTime: time_in_format(start_time),
+        endTime: time_in_format(end_time)
       )
 
       res[:rows]
@@ -91,9 +97,40 @@ class BinanceClient
   end
   add_method_tracer :margin_transfer_history, 'Custom/BinanceClient#margin_transfer_history'
 
+  def flexible_rewards_history(end_time: nil)
+    NewRelic::Agent.disable_all_tracing do
+      res = client.flexible_rewards_history(
+        recvWindow: RECV_WINDOW,
+        type: 'ALL',
+        endTime: time_in_format(end_time)
+      )
+
+      res[:rows]
+    end
+  end
+  add_method_tracer :flexible_rewards_history, 'Custom/BinanceClient#flexible_rewards_history'
+
+  def locked_rewards_history(end_time: nil)
+    NewRelic::Agent.disable_all_tracing do
+      res = client.locked_rewards_history(
+        recvWindow: RECV_WINDOW,
+        type: 'ALL',
+        size: 100,
+        endTime: time_in_format(end_time)
+      )
+
+      res[:rows]
+    end
+  end
+  add_method_tracer :locked_rewards_history, 'Custom/BinanceClient#locked_rewards_history'
+
   private
 
   def normal_spot_balance?(position)
     position[:asset].exclude?('LD')
+  end
+
+  def time_in_format(time)
+    time&.strftime('%Q')
   end
 end

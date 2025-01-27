@@ -18,6 +18,8 @@ class Wallet < ApplicationRecord
   FETCHER_CLASSES = {
     'binance' => [
       TransactionFetchers::Binance::Convertion,
+      TransactionFetchers::Binance::FlexibleReward,
+      TransactionFetchers::Binance::LockedReward,
       TransactionFetchers::Binance::Margin,
       TransactionFetchers::Binance::Spot,
     ],

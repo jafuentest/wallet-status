@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2022_05_20_052505) do
+ActiveRecord::Schema[7.0].define(version: 2025_01_25_212947) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "hstore"
   enable_extension "plpgsql"
@@ -57,7 +57,8 @@ ActiveRecord::Schema[7.0].define(version: 2022_05_20_052505) do
     t.datetime "timestamp", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["order_id", "order_type"], name: "index_transactions_on_order_id_and_order_type", unique: true
+    t.index ["wallet_id", "order_type", "order_id"], name: "index_transactions_on_wallet_id_and_order_type_and_order_id", unique: true
+    t.index ["wallet_id", "timestamp"], name: "index_transactions_on_wallet_id_and_timestamp"
     t.index ["wallet_id"], name: "index_transactions_on_wallet_id"
   end
 
