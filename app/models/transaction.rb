@@ -26,4 +26,5 @@ class Transaction < ApplicationRecord
   scope :margin_transfers, -> { where(order_type: 'margin_transfer') }
   scope :spot_trades, -> { where(order_type: 'spot_trade') }
   scope :flexible_rewards, -> { where(order_type: 'flexible_reward') }
+  scope :locked_rewards, -> { where(order_type: 'locked_reward') }
 end
