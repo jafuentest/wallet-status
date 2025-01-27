@@ -2,6 +2,7 @@ module TransactionFetchers::Binance
   class LockedReward < BaseReward
     private
 
+    AMOUNT_KEY = :amount
     ORDER_TYPE = 'locked_reward'.freeze
     PAGE_SIZE = 100
     TIMESTAMP_KEY = 'locked_last_fetch'.freeze

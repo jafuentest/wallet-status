@@ -58,7 +58,7 @@ module TransactionFetchers::Binance
         order_id: order_id_for(reward),
         order_type: self.class::ORDER_TYPE,
         to_asset: reward[:asset],
-        to_amount: reward[:rewards],
+        to_amount: reward[self.class::AMOUNT_KEY],
         timestamp: Time.strptime(reward[:time].to_s, '%Q')
       )
     rescue ActiveRecord::RecordNotUnique
