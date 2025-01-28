@@ -2,6 +2,7 @@ module TransactionFetchers::Binance
   class LockedReward < BaseReward
     private
 
+    AMOUNT_KEY = :amount
     ORDER_TYPE = 'locked_reward'.freeze
     PAGE_SIZE = 100
     TIMESTAMP_KEY = 'locked_last_fetch'.freeze
@@ -9,7 +10,7 @@ module TransactionFetchers::Binance
     def fetch_transactions(timestamp)
       Rails.logger.debug { "Fetching flexible rewards up to #{timestamp}" }
 
-      client.flexible_rewards_history(end_time: timestamp)
+      client.locked_rewards_history(end_time: timestamp)
         .select { |reward| reward[:time] > last_fetch_timestamp.strftime('%Q').to_i }
     end
 

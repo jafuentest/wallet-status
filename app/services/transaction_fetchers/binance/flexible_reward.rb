@@ -2,6 +2,7 @@ module TransactionFetchers::Binance
   class FlexibleReward < BaseReward
     private
 
+    AMOUNT_KEY = :rewards
     ORDER_TYPE = 'flexible_reward'.freeze
     PAGE_SIZE = 10
     TIMESTAMP_KEY = 'flexible_last_fetch'.freeze
