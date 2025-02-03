@@ -100,9 +100,9 @@ class BinanceClient
   end
   add_method_tracer :margin_transfer_history, 'Custom/BinanceClient#margin_transfer_history'
 
-  def flexible_rewards_history(end_time: nil)
+  def flexible_rewards_history(asset: nil, end_time: nil)
     NewRelic::Agent.disable_all_tracing do
-      params = time_range_params(end_time).merge(recvWindow: RECV_WINDOW, type: 'ALL')
+      params = time_range_params(end_time).merge(asset:, recvWindow: RECV_WINDOW, type: 'ALL')
       client.flexible_rewards_history(**params)[:rows]
     end
   end
