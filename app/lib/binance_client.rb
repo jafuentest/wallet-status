@@ -116,6 +116,14 @@ class BinanceClient
   end
   add_method_tracer :locked_rewards_history, 'Custom/BinanceClient#locked_rewards_history'
 
+  def flexible_subscription_record(end_time: nil)
+    NewRelic::Agent.disable_all_tracing do
+      params = time_range_params(end_time).merge(recvWindow: RECV_WINDOW, size: 100)
+      client.flexible_subscription_record(**params)[:rows]
+    end
+  end
+  add_method_tracer :flexible_subscription_record, 'Custom/BinanceClient#flexible_subscription_record'
+
   private
 
   def time_range_params(end_time)
