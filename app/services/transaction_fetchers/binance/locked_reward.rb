@@ -1,6 +1,30 @@
 module TransactionFetchers::Binance
   class LockedReward < BaseReward
+    def fetch
+      timestamp = start_timestamp
+
+      loop do
+        timestamp = process_batch(timestamp)
+        break if timestamp.blank?
+      end
+
+      wallet.update(api_details: wallet.api_details.merge(self.class::TIMESTAMP_KEY => start_timestamp))
+    end
+
     private
+
+    def process_batch(timestamp)
+      transactions = fetch_transactions(timestamp)
+
+      if transactions.empty?
+        return nil if timestamp == last_fetch_timestamp
+
+        return [timestamp - TIME_STEP, last_fetch_timestamp].max
+      end
+
+      transactions.each { |reward| create_transaction(reward) }
+      ensure_progress(transactions, timestamp)
+    end
 
     AMOUNT_KEY = :amount
     ORDER_TYPE = 'locked_reward'.freeze

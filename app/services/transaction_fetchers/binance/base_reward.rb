@@ -1,35 +1,12 @@
 module TransactionFetchers::Binance
   class BaseReward < Base
-    def fetch
-      timestamp = start_timestamp
-
-      loop do
-        timestamp = process_batch(timestamp)
-        break if timestamp.blank?
-      end
-
-      wallet.update(api_details: wallet.api_details.merge(self.class::TIMESTAMP_KEY => start_timestamp))
-    end
-
-    private
+    protected
 
     MIN_TIMESTAMP = Time.utc(2022, 1, 1).to_datetime
-    TIME_STEP = 30.days
-
-    def process_batch(timestamp)
-      transactions = fetch_transactions(timestamp)
-
-      if transactions.empty?
-        return nil if timestamp == last_fetch_timestamp
-
-        return [timestamp - TIME_STEP, last_fetch_timestamp].max
-      end
-
-      transactions.each { |reward| create_transaction(reward) }
-      ensure_progress(transactions, timestamp)
-    end
+    TIME_STEP = 90.days
 
     def ensure_progress(transactions, timestamp)
+
       last_time = if transactions.size == self.class::PAGE_SIZE
         Time.strptime(transactions.last[:time].to_s, '%Q').to_datetime
       else
