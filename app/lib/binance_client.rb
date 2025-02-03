@@ -3,6 +3,9 @@ require 'binance'
 class BinanceClient
   RECV_WINDOW = 60_000
 
+  # TODO: Move this should be in fetcher class
+  TIME_RANGE = 88.days
+
   attr_accessor :client
 
   def initialize(key: nil, secret: nil, wallet: nil)
@@ -99,38 +102,36 @@ class BinanceClient
 
   def flexible_rewards_history(end_time: nil)
     NewRelic::Agent.disable_all_tracing do
-      res = client.flexible_rewards_history(
-        recvWindow: RECV_WINDOW,
-        type: 'ALL',
-        endTime: time_in_format(end_time)
-      )
-
-      res[:rows]
+      params = time_range_params(end_time).merge(recvWindow: RECV_WINDOW, type: 'ALL')
+      client.flexible_rewards_history(**params)[:rows]
     end
   end
   add_method_tracer :flexible_rewards_history, 'Custom/BinanceClient#flexible_rewards_history'
 
   def locked_rewards_history(end_time: nil)
     NewRelic::Agent.disable_all_tracing do
-      res = client.locked_rewards_history(
-        recvWindow: RECV_WINDOW,
-        type: 'ALL',
-        size: 100,
-        endTime: time_in_format(end_time)
-      )
-
-      res[:rows]
+      params = time_range_params(end_time).merge(recvWindow: RECV_WINDOW, size: 100, type: 'ALL')
+      client.locked_rewards_history(**params)[:rows]
     end
   end
   add_method_tracer :locked_rewards_history, 'Custom/BinanceClient#locked_rewards_history'
 
   private
 
+  def time_range_params(end_time)
+    return { endTime: nil } if end_time.blank?
+
+    {
+      startTime: time_in_format(end_time - TIME_RANGE),
+      endTime: time_in_format(end_time),
+    }
+  end
+
   def normal_spot_balance?(position)
     position[:asset].exclude?('LD')
   end
 
   def time_in_format(time)
-    time&.strftime('%Q')
+    time.strftime('%Q')
   end
 end
