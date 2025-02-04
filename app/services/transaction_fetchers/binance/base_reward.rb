@@ -1,5 +1,9 @@
 module TransactionFetchers::Binance
   class BaseReward < Base
+    def self.amount_key
+      raise NotImplementedError, "#{self} must implement `amount_key`"
+    end
+
     private
 
     MIN_TIMESTAMP = Time.utc(2022, 1, 1).to_datetime
@@ -36,7 +40,7 @@ module TransactionFetchers::Binance
       transaction_creator.create!(
         order_id: order_id_for(reward),
         to_asset: reward[:asset],
-        to_amount: reward[self.class::AMOUNT_KEY],
+        to_amount: reward[self.class.amount_key],
         timestamp: Time.zone.at(reward[:time] / 1000).to_datetime
       )
     rescue ActiveRecord::RecordNotUnique

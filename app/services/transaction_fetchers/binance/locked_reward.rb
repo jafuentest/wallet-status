@@ -11,6 +11,10 @@ module TransactionFetchers::Binance
       wallet.update(api_details: wallet.api_details.merge(self.class::TIMESTAMP_KEY => start_timestamp))
     end
 
+    def self.amount_key
+      :amount
+    end
+
     private
 
     def process_batch(timestamp)
@@ -26,7 +30,6 @@ module TransactionFetchers::Binance
       ensure_progress(transactions, timestamp)
     end
 
-    AMOUNT_KEY = :amount
     ORDER_TYPE = 'locked_reward'.freeze
     PAGE_SIZE = 100
     TIMESTAMP_KEY = 'locked_last_fetch'.freeze

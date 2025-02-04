@@ -4,9 +4,12 @@ module TransactionFetchers::Binance
       asset_tracker.watched_assets.each { |asset| fetch_asset(asset) }
     end
 
+    def self.amount_key
+      :rewards
+    end
+
     private
 
-    AMOUNT_KEY = :rewards
     ORDER_TYPE = 'flexible_reward'.freeze
     PAGE_SIZE = 10
     TIMESTAMP_KEY = 'flexible_last_fetch'.freeze
