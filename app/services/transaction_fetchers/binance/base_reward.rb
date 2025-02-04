@@ -3,22 +3,22 @@ module TransactionFetchers::Binance
     protected
 
     MIN_TIMESTAMP = Time.utc(2022, 1, 1).to_datetime
-    TIME_STEP = 90.days
+    MAX_TIME_RANGE = 90.days
 
-    def ensure_progress(transactions, timestamp, size = self.class::PAGE_SIZE)
-      last_time = if transactions.size == size
-        Time.strptime(transactions.last[:time].to_s, '%Q').to_datetime
+    def ensure_progress(transactions, timestamp)
+      last_time = if transactions.size == self.class::PAGE_SIZE
+        Time.strptime((transactions.last[:time] - 1).to_s, '%Q').to_datetime
       else
-        timestamp - TIME_STEP
+        timestamp - MAX_TIME_RANGE
       end
       last_time -= 1.second if last_time == timestamp
       last_time
     end
 
-    def last_fetch_timestamp(key: self.class::TIMESTAMP_KEY)
+    def last_fetch_timestamp
       return @last_fetch_timestamp if defined?(@last_fetch_timestamp)
 
-      timestamp_str = wallet.api_details[key]
+      timestamp_str = wallet.api_details[self.class::TIMESTAMP_KEY]
       date_time = timestamp_str.present? ? DateTime.parse(timestamp_str) : MIN_TIMESTAMP
       @last_fetch_timestamp = date_time
     end

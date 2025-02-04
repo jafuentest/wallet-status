@@ -32,7 +32,7 @@ module TransactionFetchers::Binance
     TIMESTAMP_KEY = 'locked_last_fetch'.freeze
 
     def fetch_transactions(timestamp)
-      Rails.logger.debug { "Fetching flexible rewards up to #{timestamp}" }
+      Rails.logger.debug { "Fetching locked rewards up to #{timestamp}" }
 
       client.locked_rewards_history(end_time: timestamp)
         .select { |reward| reward[:time] > last_fetch_timestamp.strftime('%Q').to_i }
