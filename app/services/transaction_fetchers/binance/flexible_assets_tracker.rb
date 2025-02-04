@@ -1,15 +1,9 @@
 module TransactionFetchers::Binance
-  class FlexibleAssetsTracker < Base
+  class FlexibleAssetsTracker < BaseReward
     def initialize(wallet, start_timestamp:)
       super(wallet)
       @start_timestamp = start_timestamp
     end
-
-    protected
-
-    PAGE_SIZE = 100
-    ASSETS_KEY = 'flexible_assets'.freeze
-    TIMESTAMP_KEY = 'flexible_last_fetch'.freeze
 
     def watched_assets
       assets = @wallet.api_details[ASSETS_KEY]
@@ -20,6 +14,10 @@ module TransactionFetchers::Binance
 
     private
 
+    PAGE_SIZE = 100
+    ASSETS_KEY = 'flexible_assets'.freeze
+    TIMESTAMP_KEY = 'flexible_last_fetch'.freeze
+
     attr_accessor :flexible_assets, :start_timestamp
 
     def initialize_assets
@@ -28,6 +26,7 @@ module TransactionFetchers::Binance
 
       loop do
         timestamp, assets = process_batch(timestamp)
+
         flexible_assets.merge(assets)
         break if timestamp.blank?
       end
@@ -38,18 +37,25 @@ module TransactionFetchers::Binance
     end
 
     def process_batch(timestamp)
-      subscriptions = client.flexible_subscription_record(end_time: timestamp)
+      subscriptions = fetch_subscriptions(timestamp)
 
       if subscriptions.empty?
-        return nil if timestamp == last_fetch_timestamp
+        return [nil, []] if timestamp == last_fetch_timestamp
 
-        return [timestamp - MAX_TIME_RANGE, last_fetch_timestamp].max
+        return [[timestamp - MAX_TIME_RANGE, last_fetch_timestamp].max, []]
       end
 
       [
         ensure_progress(subscriptions, timestamp),
         subscriptions.pluck(:asset),
       ]
+    end
+
+    def fetch_subscriptions(timestamp)
+      Rails.logger.debug { "Fetching flexible subscriptions up to #{timestamp}" }
+
+      client.flexible_subscription_record(end_time: timestamp)
+        .select { |subscription| subscription[:time] > last_fetch_timestamp.to_i * 1000 }
     end
   end
 end

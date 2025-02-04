@@ -1,18 +1,21 @@
 module TransactionFetchers::Binance
   class BaseReward < Base
-    protected
+    private
 
     MIN_TIMESTAMP = Time.utc(2022, 1, 1).to_datetime
     MAX_TIME_RANGE = 90.days
 
     def ensure_progress(transactions, timestamp)
-      last_time = if transactions.size == self.class::PAGE_SIZE
-        Time.strptime((transactions.last[:time] - 1).to_s, '%Q').to_datetime
-      else
-        timestamp - MAX_TIME_RANGE
+      return timestamp - MAX_TIME_RANGE if transactions.blank?
+
+      # If we fetched the maximum number of transactions, we can't fetch the next
+      # time interval, or we'll be missing the transactions in between.
+      if transactions.size == self.class::PAGE_SIZE
+        # Subtract 1 second to avoid fetching the last transaction again
+        return Time.zone.at(transactions.last[:time] / 1000).to_datetime - 1.second
       end
-      last_time -= 1.second if last_time == timestamp
-      last_time
+
+      timestamp - MAX_TIME_RANGE
     end
 
     def last_fetch_timestamp
@@ -30,16 +33,19 @@ module TransactionFetchers::Binance
     end
 
     def create_transaction(reward)
-      wallet.transactions.create!(
+      transaction_creator.create!(
         order_id: order_id_for(reward),
-        order_type: self.class::ORDER_TYPE,
         to_asset: reward[:asset],
         to_amount: reward[self.class::AMOUNT_KEY],
-        timestamp: Time.strptime(reward[:time].to_s, '%Q')
+        timestamp: Time.zone.at(reward[:time] / 1000).to_datetime
       )
     rescue ActiveRecord::RecordNotUnique
-      msg = "#{self.class}: Fetched existing transaction, id: #{order_id_for(reward)}, wallet_id: #{wallet.id}}"
+      msg = "#{self.class}: Fetched existing transaction, id: #{order_id_for(reward)}, wallet_id: #{wallet.id}"
       Rails.logger.warn(msg)
+    end
+
+    def transaction_creator
+      raise NotImplementedError, "#{self.class} must implement `transaction_creator`"
     end
   end
 end

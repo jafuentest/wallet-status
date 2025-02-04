@@ -38,9 +38,8 @@ module TransactionFetchers::Binance
     def fetch_transactions(asset, timestamp)
       Rails.logger.debug { "Fetching #{asset} flexible rewards up to #{timestamp}" }
 
-      key = self.class.timestamp_key_for(asset)
       client.flexible_rewards_history(asset:, end_time: timestamp)
-        .select { |reward| reward[:time] > last_fetch_timestamp(key:).strftime('%Q').to_i }
+        .select { |reward| reward[:time] > last_fetch_timestamp.to_i * 1000 }
     end
 
     def order_id_for(reward)
@@ -49,6 +48,10 @@ module TransactionFetchers::Binance
 
     def asset_tracker
       @asset_tracker ||= FlexibleAssetsTracker.new(wallet, start_timestamp:)
+    end
+
+    def transaction_creator
+      wallet.transactions.flexible_rewards
     end
   end
 end

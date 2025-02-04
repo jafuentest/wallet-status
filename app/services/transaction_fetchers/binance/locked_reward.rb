@@ -19,7 +19,7 @@ module TransactionFetchers::Binance
       if transactions.empty?
         return nil if timestamp == last_fetch_timestamp
 
-        return [timestamp - TIME_STEP, last_fetch_timestamp].max
+        return [timestamp - MAX_TIME_RANGE, last_fetch_timestamp].max
       end
 
       transactions.each { |reward| create_transaction(reward) }
@@ -35,11 +35,15 @@ module TransactionFetchers::Binance
       Rails.logger.debug { "Fetching locked rewards up to #{timestamp}" }
 
       client.locked_rewards_history(end_time: timestamp)
-        .select { |reward| reward[:time] > last_fetch_timestamp.strftime('%Q').to_i }
+        .select { |reward| reward[:time] > last_fetch_timestamp.to_i * 1000 }
     end
 
     def order_id_for(reward)
       "#{reward[:asset]}-#{reward[:positionId]}-#{reward[:time]}"
+    end
+
+    def transaction_creator
+      wallet.transactions.locked_rewards
     end
   end
 end
