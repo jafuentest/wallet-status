@@ -1,5 +1,9 @@
 module TransactionFetchers::Binance
   class LockedReward < BaseReward
+    ORDER_TYPE = 'locked_reward'.freeze
+    PAGE_SIZE = 100
+    TIMESTAMP_KEY = 'locked_last_fetch'.freeze
+
     def fetch
       timestamp = start_timestamp
 
@@ -13,6 +17,10 @@ module TransactionFetchers::Binance
 
     def self.amount_key
       :amount
+    end
+
+    def self.order_id_for(reward)
+      "#{reward[:asset]}-#{reward[:positionId]}-#{reward[:time]}"
     end
 
     private
@@ -30,19 +38,11 @@ module TransactionFetchers::Binance
       ensure_progress(transactions, timestamp)
     end
 
-    ORDER_TYPE = 'locked_reward'.freeze
-    PAGE_SIZE = 100
-    TIMESTAMP_KEY = 'locked_last_fetch'.freeze
-
     def fetch_transactions(timestamp)
       Rails.logger.debug { "Fetching locked rewards up to #{timestamp}" }
 
       client.locked_rewards_history(end_time: timestamp)
         .select { |reward| reward[:time] > last_fetch_timestamp.to_i * 1000 }
-    end
-
-    def order_id_for(reward)
-      "#{reward[:asset]}-#{reward[:positionId]}-#{reward[:time]}"
     end
 
     def transaction_creator

@@ -1,22 +1,26 @@
 module TransactionFetchers::Binance
   class FlexibleReward < BaseReward
+    ORDER_TYPE = 'flexible_reward'.freeze
+    PAGE_SIZE = 10
+    TIMESTAMP_KEY = 'flexible_last_fetch'.freeze
+
     def fetch
-      asset_tracker.watched_assets.each { |asset| fetch_asset(asset) }
+      timestamp = start_timestamp
+      asset_tracker(timestamp).watched_assets
+        .each { |asset| fetch_asset(asset, timestamp) }
     end
 
     def self.amount_key
       :rewards
     end
 
+    def self.order_id_for(reward)
+      "#{reward[:asset]}-#{reward[:time]}"
+    end
+
     private
 
-    ORDER_TYPE = 'flexible_reward'.freeze
-    PAGE_SIZE = 10
-    TIMESTAMP_KEY = 'flexible_last_fetch'.freeze
-
-    def fetch_asset(asset)
-      timestamp = start_timestamp
-
+    def fetch_asset(asset, timestamp)
       loop do
         timestamp = process_batch(asset, timestamp)
         break if timestamp.blank?
@@ -45,12 +49,8 @@ module TransactionFetchers::Binance
         .select { |reward| reward[:time] > last_fetch_timestamp.to_i * 1000 }
     end
 
-    def order_id_for(reward)
-      "#{reward[:asset]}-#{reward[:time]}"
-    end
-
-    def asset_tracker
-      @asset_tracker ||= FlexibleAssetsTracker.new(wallet, start_timestamp:)
+    def asset_tracker(timestamp)
+      @asset_tracker ||= FlexibleAssetsTracker.new(wallet, start_timestamp: timestamp)
     end
 
     def transaction_creator

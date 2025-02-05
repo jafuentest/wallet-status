@@ -1,5 +1,9 @@
 module TransactionFetchers::Binance
   class FlexibleAssetsTracker < BaseReward
+    PAGE_SIZE = 100
+    ASSETS_KEY = 'flexible_assets'.freeze
+    TIMESTAMP_KEY = 'flexible_last_fetch'.freeze
+
     def initialize(wallet, start_timestamp:)
       super(wallet)
       @start_timestamp = start_timestamp
@@ -13,10 +17,6 @@ module TransactionFetchers::Binance
     end
 
     private
-
-    PAGE_SIZE = 100
-    ASSETS_KEY = 'flexible_assets'.freeze
-    TIMESTAMP_KEY = 'flexible_last_fetch'.freeze
 
     attr_accessor :flexible_assets, :start_timestamp
 
