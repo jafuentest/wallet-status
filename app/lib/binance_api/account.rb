@@ -9,6 +9,6 @@ module BinanceAPI
           .map { |h| { asset: h[:asset], amount: h.delete(:free).to_f } }
       end
     end
-    add_method_tracer :account, 'Custom/BinanceClient#account'
+    add_method_tracer :account, 'Custom/BinanceAPI::Account#account'
   end
 end

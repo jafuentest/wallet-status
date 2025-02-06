@@ -13,6 +13,6 @@ module BinanceAPI
         res[:rows]
       end
     end
-    add_method_tracer :margin_transfer_history, 'Custom/BinanceClient#margin_transfer_history'
+    add_method_tracer :margin_transfer_history, 'Custom/BinanceAPI::Transfers#margin_transfer_history'
   end
 end

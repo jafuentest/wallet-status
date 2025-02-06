@@ -13,7 +13,7 @@ module BinanceAPI
           end
       end
     end
-    add_method_tracer :dual_investments, 'Custom/BinanceClient#dual_investments'
+    add_method_tracer :dual_investments, 'Custom/BinanceAPI::Investments#dual_investments'
 
     def flexible_product_position
       safe_api_call do
@@ -23,7 +23,7 @@ module BinanceAPI
           end
       end
     end
-    add_method_tracer :flexible_product_position, 'Custom/BinanceClient#flexible_product_position'
+    add_method_tracer :flexible_product_position, 'Custom/BinanceAPI::Investments#flexible_product_position'
 
     def locked_product_position
       safe_api_call do
@@ -33,7 +33,7 @@ module BinanceAPI
           end
       end
     end
-    add_method_tracer :locked_product_position, 'Custom/BinanceClient#locked_product_position'
+    add_method_tracer :locked_product_position, 'Custom/BinanceAPI::Investments#locked_product_position'
 
     def flexible_rewards_history(asset: nil, end_time: nil)
       safe_api_call do
@@ -41,7 +41,7 @@ module BinanceAPI
         client.flexible_rewards_history(**params)[:rows]
       end
     end
-    add_method_tracer :flexible_rewards_history, 'Custom/BinanceClient#flexible_rewards_history'
+    add_method_tracer :flexible_rewards_history, 'Custom/BinanceAPI::Investments#flexible_rewards_history'
 
     def locked_rewards_history(end_time: nil)
       safe_api_call do
@@ -49,7 +49,7 @@ module BinanceAPI
         client.locked_rewards_history(**params)[:rows]
       end
     end
-    add_method_tracer :locked_rewards_history, 'Custom/BinanceClient#locked_rewards_history'
+    add_method_tracer :locked_rewards_history, 'Custom/BinanceAPI::Investments#locked_rewards_history'
 
     def flexible_subscription_record(end_time: nil)
       safe_api_call do
@@ -57,6 +57,6 @@ module BinanceAPI
         client.flexible_subscription_record(**params)[:rows]
       end
     end
-    add_method_tracer :flexible_subscription_record, 'Custom/BinanceClient#flexible_subscription_record'
+    add_method_tracer :flexible_subscription_record, 'Custom/BinanceAPI::Investments#flexible_subscription_record'
   end
 end

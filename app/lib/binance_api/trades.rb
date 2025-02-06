@@ -7,7 +7,7 @@ module BinanceAPI
         client.my_trades(recvWindow: RECV_WINDOW, symbol:, orderId: order_id)
       end
     end
-    add_method_tracer :my_trades, 'Custom/BinanceClient#my_trades'
+    add_method_tracer :my_trades, 'Custom/BinanceAPI::Trades#my_trades'
 
     def convert_trade_flow(start_time:, end_time:)
       safe_api_call do
@@ -20,6 +20,6 @@ module BinanceAPI
         res[:list]
       end
     end
-    add_method_tracer :convert_trade_flow, 'Custom/BinanceClient#convert_trade_flow'
+    add_method_tracer :convert_trade_flow, 'Custom/BinanceAPI::Trades#convert_trade_flow'
   end
 end
