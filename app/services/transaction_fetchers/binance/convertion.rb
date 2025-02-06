@@ -25,7 +25,7 @@ module TransactionFetchers::Binance
 
     def start_time
       convertions_last_fetch = wallet.api_details['convertions_last_fetch']
-      return Time.utc(2022, 1, 1).to_datetime if convertions_last_fetch.blank?
+      return MIN_TIMESTAMP if convertions_last_fetch.blank?
 
       DateTime.parse(convertions_last_fetch)
     end

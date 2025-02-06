@@ -2,22 +2,14 @@ require 'binance'
 
 module BinanceAPI
   class Client
-    include BinanceAPI::Helpers
-
     include BinanceAPI::Account
     include BinanceAPI::Investments
     include BinanceAPI::MarketData
     include BinanceAPI::Trades
     include BinanceAPI::Transfers
 
-    RECV_WINDOW = 60_000
-
     def initialize(key: nil, secret: nil, wallet: nil)
       @client = create_binance_client(key, secret, wallet)
-    end
-
-    def self.recv_window
-      RECV_WINDOW
     end
 
     private

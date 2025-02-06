@@ -2,6 +2,8 @@ require 'binance'
 
 module BinanceAPI
   module MarketData
+    include BinanceAPI::Helpers
+
     def ticker_price
       safe_api_call { client.ticker_price }
     end
