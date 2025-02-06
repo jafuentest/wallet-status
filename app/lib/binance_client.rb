@@ -21,7 +21,7 @@ class BinanceClient
   def account
     NewRelic::Agent.disable_all_tracing do
       client.account(recvWindow: RECV_WINDOW)[:balances]
-        .select { |e| normal_spot_balance?(e) }
+        .select { |e| e[:asset].exclude?('LD') }
         .map { |h| { asset: h[:asset], amount: h.delete(:free).to_f } }
     end
   end
@@ -61,16 +61,12 @@ class BinanceClient
   add_method_tracer :locked_product_position, 'Custom/BinanceClient#locked_product_position'
 
   def ticker_price
-    NewRelic::Agent.disable_all_tracing do
-      client.ticker_price
-    end
+    NewRelic::Agent.disable_all_tracing { client.ticker_price }
   end
   add_method_tracer :ticker_price, 'Custom/BinanceClient#ticker_price'
 
   def my_trades(symbol:, order_id:)
-    NewRelic::Agent.disable_all_tracing do
-      client.my_trades(recvWindow: RECV_WINDOW, symbol:, orderId: order_id)
-    end
+    NewRelic::Agent.disable_all_tracing { client.my_trades(recvWindow: RECV_WINDOW, symbol:, orderId: order_id) }
   end
   add_method_tracer :my_trades, 'Custom/BinanceClient#my_trades'
 
@@ -133,10 +129,6 @@ class BinanceClient
       startTime: time_in_format(end_time - TIME_RANGE),
       endTime: time_in_format(end_time),
     }
-  end
-
-  def normal_spot_balance?(position)
-    position[:asset].exclude?('LD')
   end
 
   def time_in_format(time)
