@@ -12,10 +12,8 @@ module BinanceAPI
 
     RECV_WINDOW = 60_000
 
-    def initialize(client: nil, key: nil, secret: nil, wallet: nil)
-      raise ArgumentError, "Incompatible client: #{client.inspect}" unless client.is_a?(Binance::Spot)
-
-      @client = client || create_binance_client(key, secret, wallet)
+    def initialize(key: nil, secret: nil, wallet: nil)
+      @client = create_binance_client(key, secret, wallet)
     end
 
     def self.recv_window
