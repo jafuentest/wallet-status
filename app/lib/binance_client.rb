@@ -3,6 +3,9 @@ require 'binance'
 class BinanceClient
   RECV_WINDOW = 60_000
 
+  # TODO: Move this should be in fetcher class
+  TIME_RANGE = 88.days
+
   attr_accessor :client
 
   def initialize(key: nil, secret: nil, wallet: nil)
@@ -18,7 +21,7 @@ class BinanceClient
   def account
     NewRelic::Agent.disable_all_tracing do
       client.account(recvWindow: RECV_WINDOW)[:balances]
-        .select { |e| normal_spot_balance?(e) }
+        .select { |e| e[:asset].exclude?('LD') }
         .map { |h| { asset: h[:asset], amount: h.delete(:free).to_f } }
     end
   end
@@ -58,16 +61,12 @@ class BinanceClient
   add_method_tracer :locked_product_position, 'Custom/BinanceClient#locked_product_position'
 
   def ticker_price
-    NewRelic::Agent.disable_all_tracing do
-      client.ticker_price
-    end
+    NewRelic::Agent.disable_all_tracing { client.ticker_price }
   end
   add_method_tracer :ticker_price, 'Custom/BinanceClient#ticker_price'
 
   def my_trades(symbol:, order_id:)
-    NewRelic::Agent.disable_all_tracing do
-      client.my_trades(recvWindow: RECV_WINDOW, symbol:, orderId: order_id)
-    end
+    NewRelic::Agent.disable_all_tracing { client.my_trades(recvWindow: RECV_WINDOW, symbol:, orderId: order_id) }
   end
   add_method_tracer :my_trades, 'Custom/BinanceClient#my_trades'
 
@@ -97,40 +96,42 @@ class BinanceClient
   end
   add_method_tracer :margin_transfer_history, 'Custom/BinanceClient#margin_transfer_history'
 
-  def flexible_rewards_history(end_time: nil)
+  def flexible_rewards_history(asset: nil, end_time: nil)
     NewRelic::Agent.disable_all_tracing do
-      res = client.flexible_rewards_history(
-        recvWindow: RECV_WINDOW,
-        type: 'ALL',
-        endTime: time_in_format(end_time)
-      )
-
-      res[:rows]
+      params = time_range_params(end_time).merge(asset:, recvWindow: RECV_WINDOW, type: 'ALL')
+      client.flexible_rewards_history(**params)[:rows]
     end
   end
   add_method_tracer :flexible_rewards_history, 'Custom/BinanceClient#flexible_rewards_history'
 
   def locked_rewards_history(end_time: nil)
     NewRelic::Agent.disable_all_tracing do
-      res = client.locked_rewards_history(
-        recvWindow: RECV_WINDOW,
-        type: 'ALL',
-        size: 100,
-        endTime: time_in_format(end_time)
-      )
-
-      res[:rows]
+      params = time_range_params(end_time).merge(recvWindow: RECV_WINDOW, size: 100, type: 'ALL')
+      client.locked_rewards_history(**params)[:rows]
     end
   end
   add_method_tracer :locked_rewards_history, 'Custom/BinanceClient#locked_rewards_history'
 
+  def flexible_subscription_record(end_time: nil)
+    NewRelic::Agent.disable_all_tracing do
+      params = time_range_params(end_time).merge(recvWindow: RECV_WINDOW, size: 100)
+      client.flexible_subscription_record(**params)[:rows]
+    end
+  end
+  add_method_tracer :flexible_subscription_record, 'Custom/BinanceClient#flexible_subscription_record'
+
   private
 
-  def normal_spot_balance?(position)
-    position[:asset].exclude?('LD')
+  def time_range_params(end_time)
+    return { endTime: nil } if end_time.blank?
+
+    {
+      startTime: time_in_format(end_time - TIME_RANGE),
+      endTime: time_in_format(end_time),
+    }
   end
 
   def time_in_format(time)
-    time&.strftime('%Q')
+    time.strftime('%Q')
   end
 end

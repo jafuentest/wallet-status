@@ -1,46 +1,32 @@
 module TransactionFetchers::Binance
   class BaseReward < Base
-    def fetch
-      timestamp = start_timestamp
+    MAX_TIME_RANGE = 90.days
 
-      loop do
-        timestamp = process_batch(timestamp)
-        break if timestamp.blank?
-      end
+    def self.amount_key
+      raise NotImplementedError, "#{self} must implement `amount_key`"
+    end
 
-      wallet.update(api_details: wallet.api_details.merge(self.class::TIMESTAMP_KEY => start_timestamp))
+    def self.order_id_for(*)
+      raise NotImplementedError, "#{self} must implement `order_id_for`"
     end
 
     private
 
-    MIN_TIMESTAMP = Time.utc(2022, 1, 1).to_datetime
-    TIME_STEP = 30.days
-
-    def process_batch(timestamp)
-      transactions = fetch_transactions(timestamp)
-
-      if transactions.empty?
-        return nil if timestamp == last_fetch_timestamp
-
-        return [timestamp - TIME_STEP, last_fetch_timestamp].max
-      end
-
-      transactions.each { |reward| create_transaction(reward) }
-      ensure_progress(transactions, timestamp)
-    end
-
     def ensure_progress(transactions, timestamp)
-      last_time = if transactions.size == self.class::PAGE_SIZE
-        Time.strptime(transactions.last[:time].to_s, '%Q').to_datetime
-      else
-        timestamp - TIME_STEP
+      return timestamp - MAX_TIME_RANGE if transactions.blank?
+
+      # If we fetched the maximum number of transactions, we can't fetch the next
+      # time interval, or we'll be missing the transactions in between.
+      if transactions.size == self.class::PAGE_SIZE
+        # Subtract 1 second to avoid fetching the last transaction again
+        return Time.zone.at(transactions.last[:time] / 1000).to_datetime - 1.second
       end
-      last_time -= 1.second if last_time == timestamp
-      last_time
+
+      timestamp - MAX_TIME_RANGE
     end
 
     def last_fetch_timestamp
-      return @last_fetch_timestamp if defined?(@last_fetch_timestamp)
+      return @last_fetch_timestamp if @last_fetch_timestamp.present?
 
       timestamp_str = wallet.api_details[self.class::TIMESTAMP_KEY]
       date_time = timestamp_str.present? ? DateTime.parse(timestamp_str) : MIN_TIMESTAMP
@@ -48,22 +34,24 @@ module TransactionFetchers::Binance
     end
 
     def start_timestamp
-      return @start_timestamp if defined?(@start_timestamp)
-
-      @start_timestamp = Time.current.to_datetime
+      @start_timestamp ||= Time.current.to_datetime
     end
 
     def create_transaction(reward)
-      wallet.transactions.create!(
-        order_id: order_id_for(reward),
-        order_type: self.class::ORDER_TYPE,
+      order_id = self.class.order_id_for(reward)
+      transaction_creator.create!(
+        order_id: order_id,
         to_asset: reward[:asset],
-        to_amount: reward[self.class::AMOUNT_KEY],
-        timestamp: Time.strptime(reward[:time].to_s, '%Q')
+        to_amount: reward[self.class.amount_key],
+        timestamp: Time.zone.at(reward[:time] / 1000).to_datetime
       )
     rescue ActiveRecord::RecordNotUnique
-      msg = "#{self.class}: Fetched existing transaction, id: #{order_id_for(reward)}, wallet_id: #{wallet.id}}"
+      msg = "#{self.class}: Fetched existing transaction, id: #{order_id}, wallet_id: #{wallet.id}"
       Rails.logger.warn(msg)
+    end
+
+    def transaction_creator
+      raise NotImplementedError, "#{self.class} must implement `transaction_creator`"
     end
   end
 end
