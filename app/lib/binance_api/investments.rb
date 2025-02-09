@@ -6,13 +6,7 @@ module BinanceAPI
 
     def dual_investments
       safe_api_call do
-        res = client.dual_investments(**default_params, status: 'PURCHASE_SUCCESS', size: 100)
-        res[:list].group_by { |h| h[:investCoin] }.map do |e|
-          {
-            asset: e.first,
-            amount: e.last.sum { |h| h[:subscriptionAmount].to_f },
-          }
-        end
+        client.dual_investments(**default_params, status: 'PURCHASE_SUCCESS', size: 100)[:list]
       end
     end
     add_method_tracer :dual_investments, 'Custom/BinanceAPI::Investments#dual_investments'

@@ -56,7 +56,10 @@ class WalletBalanceService
   end
 
   def dual_investment_wallet
-    client.dual_investments
+    client.dual_investments.group_by { |h| h[:investCoin] }.map do |e|
+      asset, investments = e
+      { asset:, amount: investments.sum { |h| h[:subscriptionAmount].to_f } }
+    end
   end
 
   def non_zero_balance?(position)
