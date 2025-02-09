@@ -25,7 +25,7 @@ module TransactionFetchers::Binance
 
     def start_time
       margin_tranfers_last_fetch = @wallet.api_details['margin_tranfers_last_fetch']
-      return Time.utc(2022, 1, 1).to_datetime if margin_tranfers_last_fetch.blank?
+      return MIN_TIMESTAMP if margin_tranfers_last_fetch.blank?
 
       DateTime.parse(margin_tranfers_last_fetch)
     end

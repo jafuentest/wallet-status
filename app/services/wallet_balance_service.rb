@@ -9,7 +9,7 @@ class WalletBalanceService
   def initialize(user)
     @user = user
     @wallet = user.wallets.where(service: 'binance').first
-    @client = ::BinanceClient.new(key: @wallet.api_key, secret: @wallet.api_secret)
+    @client = BinanceAPI::Client.new(key: @wallet.api_key, secret: @wallet.api_secret)
   end
 
   def update_positions
