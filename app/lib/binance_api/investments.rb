@@ -6,7 +6,7 @@ module BinanceAPI
 
     def dual_investments(status:, page: 1)
       safe_api_call do
-        client.dual_investments(**default_params, status:, size: 100, pageIndex: page)[:list]
+        client.dual_investments(**default_params, status:, pageSize: 100, pageIndex: page)[:list]
       end
     end
     add_method_tracer :dual_investments, 'Custom/BinanceAPI::Investments#dual_investments'
