@@ -2,16 +2,16 @@ module TransactionFetchers::Binance
   class Spot < Base
     def fetch
       run_at = Time.zone.now
+      jobs = []
 
       %w[usdt busd usdc btc eth bnb others].each do |parent_symbol|
-        slices = YAML.load_file Rails.root.join('config', 'trading_pairs', "#{parent_symbol}.yml")
-        slices = slices.each_pair.reduce({}) { |h, (_k, v)| h.merge(v) } if parent_symbol == 'others'
-
-        slices.each do |pair|
-          # Spread calls to binance client to prevent API lock from excessive calls
-          delay(run_at: run_at += 0.6.seconds).fetch_pair(pair)
+        available_pairs(parent_symbol).each do |pair|
+          # Spread calls to prevent API lock
+          jobs << job_hash(pair, run_at += 0.6.seconds)
         end
       end
+
+      Delayed::Job.insert_all(jobs) # rubocop:disable Rails/SkipsModelValidations
     end
 
     def fetch_pair(trade_pair)
@@ -30,12 +30,31 @@ module TransactionFetchers::Binance
 
     private
 
-    def available_pairs(parent_symbol, slice_size: nil)
-      slices = YAML.load_file(Rails.root.join('config', 'trading_pairs', "#{parent_symbol}.yml"))
-      slices = slices.each_pair.reduce({}) { |h, (_k, v)| h.merge(v) } if parent_symbol == 'others'
-      return slices if slice_size.nil?
+    def available_pairs(parent_symbol)
+      pairs = YAML.load_file(Rails.root.join('config', 'trading_pairs', "#{parent_symbol}.yml"))
+      return pairs unless parent_symbol == 'others'
 
-      slices.each_slice(slice_size)
+      pairs.each_pair.reduce({}) { |h, (_k, v)| h.merge(v) }
+    end
+
+    def load_pairs
+      %w[usdt busd usdc btc eth bnb others].reduce({}) do |all_pairs, parent_symbol|
+        pairs = YAML.load_file(Rails.root.join('config', 'trading_pairs', "#{parent_symbol}.yml"))
+        pairs = pairs.each_pair.reduce({}) { |h, (_k, v)| h.merge(v) } if parent_symbol == 'others'
+        all_pairs.merge(pairs)
+      end
+    end
+
+    def job_hash(pair, run_at)
+      handler = YAML.dump(Delayed::PerformableMethod.new(self, :fetch_pair, [pair]))
+
+      {
+        handler: YAML.dump(handler),
+        run_at: run_at,
+        created_at: Time.zone.now,
+        updated_at: Time.zone.now,
+        queue: 'default',
+      }
     end
 
     def log_fetch(pair)
