@@ -56,7 +56,8 @@ class WalletBalanceService
   end
 
   def dual_investment_wallet
-    client.dual_investments.group_by { |h| h[:investCoin] }.map do |e|
+    open_orders = client.dual_investments(status: 'PURCHASE_SUCCESS')
+    open_orders.group_by { |h| h[:investCoin] }.map do |e|
       asset, investments = e
       { asset:, amount: investments.sum { |h| h[:subscriptionAmount].to_f } }
     end
