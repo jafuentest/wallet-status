@@ -46,7 +46,7 @@ module TransactionFetchers::Binance
     end
 
     def job_hash(pair, run_at)
-      handler = YAML.dump(Delayed::PerformableMethod.new(self, :fetch_pair, [pair]))
+      handler = Delayed::PerformableMethod.new(FetchSpotTradesJob, :perform_now, [@wallet.id, pair])
 
       {
         handler: YAML.dump(handler),
