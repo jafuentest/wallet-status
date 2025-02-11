@@ -8,12 +8,7 @@ module TransactionFetchers::Binance
 
       loop do
         Rails.logger.debug { "Fetching dual_investments page ##{page}" }
-
-        transactions = client.dual_investments(status: 'SETTLED')
-          .map { |order| initialize_transaction(order) }
-
-        insert_result = Transaction.insert_all(transactions) # rubocop:disable Rails/SkipsModelValidations
-        break if insert_result.rows.size < PAGE_SIZE
+        break if process_page(page) < PAGE_SIZE
 
         page += 1
       end
@@ -21,12 +16,15 @@ module TransactionFetchers::Binance
 
     private
 
-    def log_fetch(page)
-      Rails.logger.debug { "Fetching dual_investments page ##{page}" }
+    def process_page(page)
+      transactions = client.dual_investments(status: 'SETTLED', page:)
+        .map { |order| transaction_hash(order) }
+
+      Transaction.insert_all(transactions).rows # rubocop:disable Rails/SkipsModelValidations
     end
 
-    def initialize_transaction(order)
-      transaction = {
+    def transaction_hash(order)
+      normalize_transaction(
         wallet_id: @wallet.id,
         from_asset: order[:investCoin],
         from_amount: BigDecimal(order[:subscriptionAmount]),
@@ -34,10 +32,8 @@ module TransactionFetchers::Binance
         to_amount: BigDecimal(order[:settleAmount]),
         order_id: order[:id],
         order_type: TRANSACTION_TYPE,
-        timestamp: Time.zone.at(order[:settleDate] / 1000).to_datetime,
-      }
-
-      normalize_transaction(transaction)
+        timestamp: Time.zone.at(order[:settleDate] / 1000).to_datetime
+      )
     end
 
     def normalize_transaction(transaction)

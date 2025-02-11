@@ -2,16 +2,15 @@ module TransactionFetchers::Binance
   class Spot < Base
     def fetch
       run_at = Time.zone.now
-      jobs = []
 
       %w[usdt busd usdc btc eth bnb others].each do |parent_symbol|
-        available_pairs(parent_symbol).each do |pair|
+        jobs = available_pairs(parent_symbol).map do |pair|
           # Spread calls to prevent API lock
-          jobs << job_hash(pair, run_at += 0.6.seconds)
+          job_hash(pair, run_at += 0.6.seconds)
         end
-      end
 
-      Delayed::Job.insert_all(jobs) # rubocop:disable Rails/SkipsModelValidations
+        Delayed::Job.insert_all(jobs) # rubocop:disable Rails/SkipsModelValidations
+      end
     end
 
     def fetch_pair(trade_pair)
@@ -35,14 +34,6 @@ module TransactionFetchers::Binance
       return pairs unless parent_symbol == 'others'
 
       pairs.each_pair.reduce({}) { |h, (_k, v)| h.merge(v) }
-    end
-
-    def load_pairs
-      %w[usdt busd usdc btc eth bnb others].reduce({}) do |all_pairs, parent_symbol|
-        pairs = YAML.load_file(Rails.root.join('config', 'trading_pairs', "#{parent_symbol}.yml"))
-        pairs = pairs.each_pair.reduce({}) { |h, (_k, v)| h.merge(v) } if parent_symbol == 'others'
-        all_pairs.merge(pairs)
-      end
     end
 
     def job_hash(pair, run_at)
