@@ -8,8 +8,10 @@ module TransactionFetchers::Binance
 
       loop do
         Rails.logger.debug { "Fetching dual_investments page ##{page}" }
-        orders = client.dual_investments(status: 'SETTLED')
-        transactions = orders.map { |order| initialize_transaction(order) }
+
+        transactions = client.dual_investments(status: 'SETTLED')
+          .map { |order| initialize_transaction(order) }
+
         insert_result = Transaction.insert_all(transactions) # rubocop:disable Rails/SkipsModelValidations
         break if insert_result.rows.size < PAGE_SIZE
 
@@ -18,18 +20,6 @@ module TransactionFetchers::Binance
     end
 
     private
-
-    def job_hash(pair, run_at)
-      handler = YAML.dump(Delayed::PerformableMethod.new(self, :fetch_pair, [pair]))
-
-      {
-        handler: YAML.dump(handler),
-        run_at: run_at,
-        created_at: Time.zone.now,
-        updated_at: Time.zone.now,
-        queue: 'default',
-      }
-    end
 
     def log_fetch(page)
       Rails.logger.debug { "Fetching dual_investments page ##{page}" }
