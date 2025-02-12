@@ -39,9 +39,8 @@ module TransactionFetchers::Binance
     def normalize_transaction(transaction)
       return transaction if transaction[:from_asset] != transaction[:to_asset]
 
-      transaction[:to_amount] -= transaction[:from_amount]
-      transaction[:from_amount] = 0
-      transaction[:from_asset] = nil
+      transaction[:to_amount] -= transaction.delete(:from_amount)
+      transaction.delete(:from_asset)
       transaction
     end
   end
