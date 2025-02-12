@@ -4,13 +4,12 @@ module TransactionFetchers::Binance
       run_at = Time.zone.now
 
       %w[usdt busd usdc btc eth bnb others].each do |parent_symbol|
-        slices = YAML.load_file Rails.root.join('config', 'trading_pairs', "#{parent_symbol}.yml")
-        slices = slices.each_pair.reduce({}) { |h, (_k, v)| h.merge(v) } if parent_symbol == 'others'
-
-        slices.each do |pair|
-          # Spread calls to binance client to prevent API lock from excessive calls
-          delay(run_at: run_at += 0.6.seconds).fetch_pair(pair)
+        jobs = available_pairs(parent_symbol).map do |pair|
+          # Spread calls to prevent API lock
+          job_hash(pair, run_at += 0.6.seconds)
         end
+
+        Delayed::Job.insert_all(jobs) # rubocop:disable Rails/SkipsModelValidations
       end
     end
 
@@ -30,12 +29,23 @@ module TransactionFetchers::Binance
 
     private
 
-    def available_pairs(parent_symbol, slice_size: nil)
-      slices = YAML.load_file(Rails.root.join('config', 'trading_pairs', "#{parent_symbol}.yml"))
-      slices = slices.each_pair.reduce({}) { |h, (_k, v)| h.merge(v) } if parent_symbol == 'others'
-      return slices if slice_size.nil?
+    def available_pairs(parent_symbol)
+      pairs = YAML.load_file(Rails.root.join('config', 'trading_pairs', "#{parent_symbol}.yml"))
+      return pairs unless parent_symbol == 'others'
 
-      slices.each_slice(slice_size)
+      pairs.each_pair.reduce({}) { |h, (_k, v)| h.merge(v) }
+    end
+
+    def job_hash(pair, run_at)
+      handler = Delayed::PerformableMethod.new(FetchSpotTradesJob, :perform_now, [@wallet.id, pair])
+
+      {
+        handler: YAML.dump(handler),
+        run_at: run_at,
+        created_at: Time.zone.now,
+        updated_at: Time.zone.now,
+        queue: 'default',
+      }
     end
 
     def log_fetch(pair)
