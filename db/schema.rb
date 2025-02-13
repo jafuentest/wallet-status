@@ -10,38 +10,10 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_01_25_212947) do
+ActiveRecord::Schema[7.2].define(version: 2022_03_28_052750) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "hstore"
   enable_extension "plpgsql"
-
-  create_table "cost_basis_logs", force: :cascade do |t|
-    t.bigint "transaction_id", null: false
-    t.float "cost_basis"
-    t.float "total_amount"
-    t.string "asset"
-    t.datetime "timestamp"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["asset"], name: "index_cost_basis_logs_on_asset"
-    t.index ["timestamp"], name: "index_cost_basis_logs_on_timestamp"
-    t.index ["transaction_id"], name: "index_cost_basis_logs_on_transaction_id"
-  end
-
-  create_table "delayed_jobs", force: :cascade do |t|
-    t.integer "priority", default: 0, null: false
-    t.integer "attempts", default: 0, null: false
-    t.text "handler", null: false
-    t.text "last_error"
-    t.datetime "run_at"
-    t.datetime "locked_at"
-    t.datetime "failed_at"
-    t.string "locked_by"
-    t.string "queue"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-    t.index ["priority", "run_at"], name: "delayed_jobs_priority"
-  end
 
   create_table "positions", force: :cascade do |t|
     t.bigint "wallet_id", null: false
@@ -70,8 +42,7 @@ ActiveRecord::Schema[7.0].define(version: 2025_01_25_212947) do
     t.datetime "timestamp", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["wallet_id", "order_type", "order_id"], name: "index_transactions_on_wallet_id_and_order_type_and_order_id", unique: true
-    t.index ["wallet_id", "timestamp"], name: "index_transactions_on_wallet_id_and_timestamp"
+    t.index ["order_id", "order_type"], name: "index_transactions_on_order_id_and_order_type", unique: true
     t.index ["wallet_id"], name: "index_transactions_on_wallet_id"
   end
 
@@ -101,7 +72,6 @@ ActiveRecord::Schema[7.0].define(version: 2025_01_25_212947) do
     t.index ["user_id"], name: "index_wallets_on_user_id"
   end
 
-  add_foreign_key "cost_basis_logs", "transactions"
   add_foreign_key "positions", "wallets"
   add_foreign_key "transactions", "wallets"
   add_foreign_key "wallets", "users"

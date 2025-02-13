@@ -22,7 +22,7 @@
 class Transaction < ApplicationRecord
   belongs_to :wallet
 
-  has_many :cost_basis_logs, dependent: :destroy
+  has_many :cost_basis_changes, dependent: :destroy
 
   scope :convertions, -> { where(order_type: 'convert') }
   scope :margin_transfers, -> { where(order_type: 'margin_transfer') }
