@@ -55,7 +55,7 @@ gem 'stimulus-rails'
 gem 'parallel', '~> 1.22'
 
 # Hotfix for some incompatibility issues
-gem 'concurrent-ruby', '< 1.3.5'
+gem 'concurrent-ruby', '< 1.3.6'
 gem 'nokogiri', '< 1.18'
 
 # Gems that were or will be removed from Ruby standard library
