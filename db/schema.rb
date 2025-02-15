@@ -17,7 +17,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_02_13_012037) do
 
   create_table "cost_bases", force: :cascade do |t|
     t.bigint "user_id", null: false
-    t.decimal "total_amount"
+    t.decimal "amount"
     t.decimal "cost_basis"
     t.string "asset"
     t.datetime "created_at", null: false
