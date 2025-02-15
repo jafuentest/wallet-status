@@ -29,6 +29,7 @@ class Wallet < ApplicationRecord
   belongs_to :user
   has_many :positions, dependent: :destroy
   has_many :transactions, dependent: :destroy
+  has_many :cost_basis_logs, through: :transactions, dependent: :destroy
 
   def fetcher_classes
     FETCHER_CLASSES[service]

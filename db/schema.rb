@@ -10,25 +10,10 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_01_25_212947) do
+ActiveRecord::Schema[7.2].define(version: 2022_03_28_052750) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "hstore"
   enable_extension "plpgsql"
-
-  create_table "delayed_jobs", force: :cascade do |t|
-    t.integer "priority", default: 0, null: false
-    t.integer "attempts", default: 0, null: false
-    t.text "handler", null: false
-    t.text "last_error"
-    t.datetime "run_at"
-    t.datetime "locked_at"
-    t.datetime "failed_at"
-    t.string "locked_by"
-    t.string "queue"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-    t.index ["priority", "run_at"], name: "delayed_jobs_priority"
-  end
 
   create_table "positions", force: :cascade do |t|
     t.bigint "wallet_id", null: false
@@ -57,8 +42,7 @@ ActiveRecord::Schema[7.0].define(version: 2025_01_25_212947) do
     t.datetime "timestamp", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["wallet_id", "order_type", "order_id"], name: "index_transactions_on_wallet_id_and_order_type_and_order_id", unique: true
-    t.index ["wallet_id", "timestamp"], name: "index_transactions_on_wallet_id_and_timestamp"
+    t.index ["order_id", "order_type"], name: "index_transactions_on_order_id_and_order_type", unique: true
     t.index ["wallet_id"], name: "index_transactions_on_wallet_id"
   end
 
