@@ -18,6 +18,7 @@ class CostBasisCalculator
   def process_transaction(transaction)
     asset_changes(transaction).each do |change|
       new_cost_basis = @strategy.calculate(
+        transaction,
         change[:asset],
         change[:amount],
         asset_cost_basis_for(change[:asset])

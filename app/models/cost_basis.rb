@@ -11,4 +11,7 @@
 #  updated_at   :datetime         not null
 #
 class CostBasis < ApplicationRecord
+  def cost_per_unit
+    cost_basis / total_amount
+  end
 end
