@@ -17,6 +17,8 @@ module CostBasisStrategies
     attr_reader :base_currency, :binance_client
 
     def fetch_market_price(asset, timestamp)
+      return BigDecimal(1) if asset == 'USDT'
+
       date_as_int = timestamp.beginning_of_day.to_i * 1000
       cached_price = @market_price_cache.dig(asset, date_as_int)
       return cached_price unless cached_price.nil?
