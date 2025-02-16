@@ -6,10 +6,9 @@ class CostBasisCalculator
   end
 
   def calculate
-    @user.transactions.order(:timestamp).each do |transaction|
-      ActiveRecord::Base.transaction do
-        process_transaction(transaction)
-      end
+    transactions = @user.transactions.where(timestamp: start_time..).order(:timestamp)
+    transactions.each do |transaction|
+      ActiveRecord::Base.transaction { process_transaction(transaction) }
     end
   end
 
@@ -19,6 +18,13 @@ class CostBasisCalculator
   end
 
   private
+
+  def start_time
+    last_change = @user.cost_basis_changes.order(:timestamp).last
+    return DateTime.new if last_change.nil?
+
+    last_change.generating_transaction.timestamp
+  end
 
   def process_transaction(transaction)
     asset_changes(transaction).each do |change|
