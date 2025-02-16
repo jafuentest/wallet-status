@@ -13,6 +13,11 @@ class CostBasisCalculator
     end
   end
 
+  def self.average_calculator_for(user)
+    api_client = BinanceAPI::Client.new(wallet: user.wallets.first)
+    new(user, CostBasisStrategies::Average.new('USD', api_client))
+  end
+
   private
 
   def process_transaction(transaction)
@@ -24,20 +29,26 @@ class CostBasisCalculator
         asset_cost_basis_for(change[:asset])
       )
 
-      update_cost_basis(new_cost_basis)
+      update_cost_basis(new_cost_basis, change[:amount])
     end
   end
 
   def asset_changes(transaction)
-    [
+    changes = [
       { amount: transaction.to_amount, asset: transaction.to_asset },
-      { amount: -transaction.fee_amount, asset: transaction.fee_asset },
-      { amount: -transaction.from_amount, asset: transaction.from_asset },
     ].reject { |e| e[:asset].nil? }
+
+    changes << { amount: -transaction.fee_amount, asset: transaction.fee_asset } if transaction.fee_amount.present?
+    changes << { amount: -transaction.from_amount, asset: transaction.from_asset } if transaction.from_amount.present?
+    changes
   end
 
   def asset_cost_basis_for(asset)
-    @asset_cost_basis_cache[asset] ||= CostBasis.find_or_initialize_by(user: @user, asset: asset)
+    @asset_cost_basis_cache[asset] ||= CostBasis.find_or_initialize_by(user_id: @user.id, asset: asset)
+    @asset_cost_basis_cache[asset].tap do |cost_basis|
+      cost_basis.total_amount ||= 0
+      cost_basis.cost_basis ||= 0
+    end
   end
 
   def update_cost_basis(new_cost_basis, amount)

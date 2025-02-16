@@ -9,6 +9,7 @@ module CostBasisStrategies
 
       current_cost_basis.total_amount += amount
       current_cost_basis.cost_basis += new_cost_basis.amount
+      new_cost_basis
     end
 
     private
@@ -16,7 +17,7 @@ module CostBasisStrategies
     def asset_value(asset, amount, timestamp, current_cost_basis)
       return amount * current_cost_basis.cost_per_unit if amount.negative?
 
-      amount * self.class.fetch_market_price(asset, timestamp)
+      amount * fetch_market_price(asset, timestamp)
     end
   end
 end

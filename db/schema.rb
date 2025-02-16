@@ -17,7 +17,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_02_13_012037) do
 
   create_table "cost_bases", force: :cascade do |t|
     t.bigint "user_id", null: false
-    t.decimal "amount"
+    t.decimal "total_amount"
     t.decimal "cost_basis"
     t.string "asset"
     t.datetime "created_at", null: false
@@ -27,7 +27,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_02_13_012037) do
 
   create_table "cost_basis_changes", force: :cascade do |t|
     t.bigint "transaction_id", null: false
-    t.float "amount"
+    t.decimal "amount"
     t.string "asset"
     t.string "quote_currency"
     t.datetime "created_at", null: false

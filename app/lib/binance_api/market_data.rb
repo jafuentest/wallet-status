@@ -4,8 +4,8 @@ module BinanceAPI
   module MarketData
     include BinanceAPI::Helpers
 
-    def klines(symbol:, interval: '1d', limit: 1000)
-      safe_api_call { client.klines(symbol:, interval:, limit:) }
+    def klines(symbol:, start_time:, interval: '1d', limit: 1000)
+      safe_api_call { client.klines(symbol:, interval:, limit:, startTime: time_in_format(start_time)) }
     end
     add_method_tracer :klines, 'Custom/BinanceAPI::MarketData#klines'
 

@@ -14,20 +14,22 @@ module CostBasisStrategies
 
     private
 
-    attr_reader :base_currency
+    attr_reader :base_currency, :binance_client
 
     def fetch_market_price(asset, timestamp)
-      date_as_int = timestamp.to_date.to_time.to_i * 1000
+      date_as_int = timestamp.beginning_of_day.to_i * 1000
       cached_price = @market_price_cache.dig(asset, date_as_int)
       return cached_price unless cached_price.nil?
 
       symbol = "#{asset}USDT"
-      binance_client.klines(symbol:, interval: '1d').each do |kline|
-        add_kline_to_cache(kline)
+      binance_client.klines(symbol:, start_time: date_as_int).each do |kline|
+        add_kline_to_cache(kline, asset)
       end
+
+      @market_price_cache.dig(asset, date_as_int)
     end
 
-    def add_kline_to_cache(kline)
+    def add_kline_to_cache(kline, asset)
       open_time = kline[0]
       high_price = BigDecimal(kline[2])
       low_price = BigDecimal(kline[3])
