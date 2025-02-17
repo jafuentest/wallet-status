@@ -10,10 +10,31 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_01_25_212947) do
+ActiveRecord::Schema[7.2].define(version: 2025_02_13_012037) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "hstore"
   enable_extension "plpgsql"
+
+  create_table "cost_bases", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.decimal "total_amount"
+    t.decimal "cost_basis"
+    t.string "asset"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_cost_bases_on_user_id"
+  end
+
+  create_table "cost_basis_changes", force: :cascade do |t|
+    t.bigint "transaction_id", null: false
+    t.decimal "amount"
+    t.string "asset"
+    t.string "quote_currency"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["asset"], name: "index_cost_basis_changes_on_asset"
+    t.index ["transaction_id"], name: "index_cost_basis_changes_on_transaction_id"
+  end
 
   create_table "delayed_jobs", force: :cascade do |t|
     t.integer "priority", default: 0, null: false
@@ -33,7 +54,6 @@ ActiveRecord::Schema[7.0].define(version: 2025_01_25_212947) do
   create_table "positions", force: :cascade do |t|
     t.bigint "wallet_id", null: false
     t.string "sub_wallet"
-    t.decimal "cost_basis"
     t.decimal "amount", null: false
     t.string "symbol", null: false
     t.datetime "created_at", null: false
@@ -45,13 +65,10 @@ ActiveRecord::Schema[7.0].define(version: 2025_01_25_212947) do
     t.bigint "wallet_id", null: false
     t.string "from_asset"
     t.decimal "from_amount"
-    t.decimal "from_cost_basis"
     t.string "to_asset"
     t.decimal "to_amount"
-    t.decimal "to_cost_basis"
     t.string "fee_asset"
     t.decimal "fee_amount"
-    t.decimal "fee_cost_basis"
     t.string "order_id"
     t.string "order_type", null: false
     t.datetime "timestamp", null: false
@@ -88,6 +105,8 @@ ActiveRecord::Schema[7.0].define(version: 2025_01_25_212947) do
     t.index ["user_id"], name: "index_wallets_on_user_id"
   end
 
+  add_foreign_key "cost_bases", "users"
+  add_foreign_key "cost_basis_changes", "transactions"
   add_foreign_key "positions", "wallets"
   add_foreign_key "transactions", "wallets"
   add_foreign_key "wallets", "users"

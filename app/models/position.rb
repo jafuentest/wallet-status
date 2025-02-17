@@ -5,7 +5,6 @@
 #  id         :bigint           not null, primary key
 #  wallet_id  :bigint           not null
 #  sub_wallet :string
-#  cost_basis :decimal(, )
 #  amount     :decimal(, )      not null
 #  symbol     :string           not null
 #  created_at :datetime         not null

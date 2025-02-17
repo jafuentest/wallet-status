@@ -20,7 +20,11 @@ module TransactionFetchers::Binance
       transactions = client.dual_investments(status: 'SETTLED', page:)
         .map { |order| transaction_hash(order) }
 
-      Transaction.insert_all(transactions).rows # rubocop:disable Rails/SkipsModelValidations
+      rows = transactions.group_by { |t| t[:from_amount].present? }.map do |_exercised, t|
+        Transaction.insert_all(t).rows # rubocop:disable Rails/SkipsModelValidations
+      end
+
+      rows.sum(&:size)
     end
 
     def transaction_hash(order)
