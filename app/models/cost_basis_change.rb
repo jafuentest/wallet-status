@@ -4,7 +4,7 @@
 #
 #  id             :bigint           not null, primary key
 #  transaction_id :bigint           not null
-#  amount         :float
+#  amount         :decimal(, )
 #  asset          :string
 #  quote_currency :string
 #  created_at     :datetime         not null
